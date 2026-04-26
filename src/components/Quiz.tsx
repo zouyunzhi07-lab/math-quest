@@ -2,6 +2,26 @@ import { useState, useEffect, useRef } from 'react';
 import { Question, Character, UserProgress } from '../types';
 import './Quiz.css';
 
+// Voice types
+type VoiceType = 'male' | 'female' | 'girl';
+
+interface VoiceOption {
+  id: VoiceType;
+  label: string;
+  icon: string;
+  voiceName: string;
+  pitch: number;
+  rate: number;
+}
+
+const VOICE_OPTIONS: VoiceOption[] = [
+  { id: 'male', label: 'Male', icon: '👨', voiceName: 'Microsoft David', pitch: 1, rate: 0.9 },
+  { id: 'female', label: 'Female', icon: '👩', voiceName: 'Microsoft Zira', pitch: 1.1, rate: 0.9 },
+  { id: 'girl', label: 'Cheerful Girl', icon: '👧', voiceName: 'Microsoft Aria', pitch: 1.3, rate: 1 },
+];
+
+const VOICE_STORAGE_KEY = 'math-quest-tts-voice';
+
 interface Props {
   question: Question;
   questionIndex: number;
@@ -19,6 +39,11 @@ function Quiz({ question, questionIndex, totalQuestions, onAnswer, onMarkUnsure,
   const [isSpeaking, setIsSpeaking] = useState(false);
   const [showResult, setShowResult] = useState(false);
   const [markedUnsure, setMarkedUnsure] = useState(false);
+  const [selectedVoice, setSelectedVoice] = useState<VoiceType>(() => {
+    const saved = localStorage.getItem(VOICE_STORAGE_KEY);
+    return (saved as VoiceType) || 'female';
+  });
+  const [showVoiceSettings, setShowVoiceSettings] = useState(false);
   const utteranceRef = useRef<SpeechSynthesisUtterance | null>(null);
 
   useEffect(() => {
@@ -29,9 +54,9 @@ function Quiz({ question, questionIndex, totalQuestions, onAnswer, onMarkUnsure,
     window.speechSynthesis.cancel();
   }, [question]);
 
-  const handleMarkUnsure = () => {
-    setMarkedUnsure(true);
-    onMarkUnsure();
+  const handleVoiceChange = (voiceId: VoiceType) => {
+    setSelectedVoice(voiceId);
+    localStorage.setItem(VOICE_STORAGE_KEY, voiceId);
   };
 
   const playTTS = () => {
@@ -41,17 +66,28 @@ function Quiz({ question, questionIndex, totalQuestions, onAnswer, onMarkUnsure,
       return;
     }
 
+    const voiceConfig = VOICE_OPTIONS.find(v => v.id === selectedVoice) || VOICE_OPTIONS[1];
     const text = `${question.question}`;
+    
     const utterance = new SpeechSynthesisUtterance(text);
     utterance.lang = 'en-US';
-    utterance.rate = 0.85;
-    utterance.pitch = 1;
+    utterance.rate = voiceConfig.rate;
+    utterance.pitch = voiceConfig.pitch;
     
-    // Try to get Microsoft voices (in browser)
+    // Try to find the preferred Microsoft voice
     const voices = window.speechSynthesis.getVoices();
-    const preferredVoice = voices.find(v => 
-      v.name.includes('Microsoft') || v.name.includes('Natural') || v.lang.startsWith('en')
-    );
+    let preferredVoice = voices.find(v => v.name.includes(voiceConfig.voiceName));
+    
+    // Fallback to any Microsoft English voice
+    if (!preferredVoice) {
+      preferredVoice = voices.find(v => v.name.includes('Microsoft') && v.lang.startsWith('en'));
+    }
+    
+    // Fallback to any available English voice
+    if (!preferredVoice) {
+      preferredVoice = voices.find(v => v.lang.startsWith('en'));
+    }
+    
     if (preferredVoice) {
       utterance.voice = preferredVoice;
     }
@@ -117,9 +153,41 @@ function Quiz({ question, questionIndex, totalQuestions, onAnswer, onMarkUnsure,
         <div className="question-section">
           <span className="question-type">{getTypeLabel()}</span>
           <h2 className="question-text">{question.question}</h2>
-          <button className={`tts-btn ${isSpeaking ? 'speaking' : ''}`} onClick={playTTS}>
-            {isSpeaking ? '🔊 Playing...' : '🔈 Play Question'}
-          </button>
+          <div className="tts-controls">
+            <button className={`tts-btn ${isSpeaking ? 'speaking' : ''}`} onClick={playTTS}>
+              {isSpeaking ? '🔊 Playing...' : '🔈 Play'}
+            </button>
+            <button 
+              className={`voice-settings-btn ${showVoiceSettings ? 'active' : ''}`} 
+              onClick={() => setShowVoiceSettings(!showVoiceSettings)}
+              title="Voice Settings"
+            >
+              ⚙️ Voice
+            </button>
+          </div>
+          {showVoiceSettings && (
+            <div className="voice-settings-panel">
+              <div className="voice-settings-header">
+                <span>🎙️ Select Voice</span>
+                <button className="voice-settings-close" onClick={() => setShowVoiceSettings(false)}>×</button>
+              </div>
+              <div className="voice-options">
+                {VOICE_OPTIONS.map(option => (
+                  <button
+                    key={option.id}
+                    className={`voice-option-btn ${selectedVoice === option.id ? 'selected' : ''}`}
+                    onClick={() => {
+                      handleVoiceChange(option.id);
+                      setShowVoiceSettings(false);
+                    }}
+                  >
+                    <span className="voice-icon">{option.icon}</span>
+                    <span className="voice-label">{option.label}</span>
+                  </button>
+                ))}
+              </div>
+            </div>
+          )}
         </div>
 
         <div className="answer-section">

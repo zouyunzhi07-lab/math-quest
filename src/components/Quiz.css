@@ -86,6 +86,116 @@
   animation: pulse 1s infinite;
 }
 
+.tts-controls {
+  display: flex;
+  gap: 0.5rem;
+  justify-content: center;
+  align-items: center;
+}
+
+.voice-settings-btn {
+  background: var(--bg-secondary);
+  color: var(--text-primary);
+  padding: 0.6rem 1rem;
+  border-radius: 8px;
+  font-size: 0.85rem;
+  transition: all 0.2s;
+  border: 1px solid transparent;
+}
+
+.voice-settings-btn:hover {
+  background: var(--secondary);
+  border-color: var(--primary);
+}
+
+.voice-settings-btn.active {
+  background: var(--secondary);
+  border-color: var(--primary);
+  color: var(--primary);
+}
+
+.voice-settings-panel {
+  margin-top: 1rem;
+  background: var(--bg-secondary);
+  border-radius: 12px;
+  padding: 1rem;
+  border: 1px solid var(--primary);
+  animation: fadeIn 0.2s ease;
+}
+
+.voice-settings-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 0.8rem;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.voice-settings-close {
+  background: none;
+  border: none;
+  font-size: 1.5rem;
+  color: var(--text-secondary);
+  cursor: pointer;
+  padding: 0;
+  line-height: 1;
+}
+
+.voice-settings-close:hover {
+  color: var(--error);
+}
+
+.voice-options {
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+.voice-option-btn {
+  background: var(--bg-primary);
+  color: var(--text-primary);
+  padding: 0.6rem 1rem;
+  border-radius: 20px;
+  font-size: 0.85rem;
+  transition: all 0.2s;
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  border: 2px solid transparent;
+}
+
+.voice-option-btn:hover {
+  background: var(--primary);
+  transform: scale(1.05);
+}
+
+.voice-option-btn.selected {
+  background: var(--primary);
+  border-color: var(--success);
+  box-shadow: 0 0 10px rgba(107, 203, 119, 0.3);
+}
+
+.voice-icon {
+  font-size: 1.2rem;
+}
+
+.voice-label {
+  font-weight: 500;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
 .choices-grid {
   display: grid;
   gap: 0.8rem;
