@@ -15,9 +15,9 @@ interface VoiceOption {
 }
 
 const VOICE_OPTIONS: VoiceOption[] = [
-  { id: 'male', label: 'Male', icon: '👨', voiceNames: ['Microsoft David', 'Microsoft James', 'Microsoft Mark', 'Microsoft Ryan'], pitch: 1, rate: 0.9 },
-  { id: 'female', label: 'Female', icon: '👩', voiceNames: ['Microsoft Zira', 'Microsoft Ava', 'Microsoft Susan', 'Microsoft Emily', 'Microsoft Jenny'], pitch: 1.15, rate: 0.9 },
-  { id: 'girl', label: 'Cheerful Girl', icon: '👧', voiceNames: ['Microsoft Aria', 'Microsoft Sophie', 'Microsoft Nanami', 'Microsoft Saria'], pitch: 1.4, rate: 1.05 },
+  { id: 'male', label: 'Male', icon: '👨', voiceNames: ['Microsoft David', 'en-US-GuyNeural', 'en-US-EricNeural', 'en-US-ChristopherNeural'], pitch: 1, rate: 0.9 },
+  { id: 'female', label: 'Female', icon: '👩', voiceNames: ['en-US-JennyNeural', 'Microsoft Zira', 'en-US-AriaNeural', 'en-US-SaraNeural'], pitch: 1.1, rate: 0.9 },
+  { id: 'girl', label: 'Cheerful Girl', icon: '👧', voiceNames: ['en-US-AnaNeural', 'en-US-AriaNeural', 'en-US-MichelleNeural', 'Microsoft Ananya'], pitch: 1.3, rate: 1 },
 ];
 
 const VOICE_STORAGE_KEY = 'math-quest-tts-voice';
