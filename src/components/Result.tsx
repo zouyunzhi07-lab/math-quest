@@ -10,7 +10,7 @@ interface Props {
   character: Character;
 }
 
-function Result({ answers, question, onContinue, character }: Props) {
+function Result({ answers, onContinue, character }: Props) {
   // Calculate from all answers
   const correctCount = answers.filter(a => a.correct).length;
   const totalCount = answers.length;

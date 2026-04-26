@@ -9,8 +9,8 @@ import Quiz from './components/Quiz';
 import Result from './components/Result';
 import Reward from './components/Reward';
 import Admin from './components/Admin';
-import { questions, getQuestionsForLevel, getReward } from './data';
-import type { GameState, Character, GameScreen, UserProgress } from './types';
+import { getQuestionsForLevel } from './data';
+import type { GameState, Character, UserProgress } from './types';
 import { supabase } from './supabase';
 import './App.css';
 
@@ -50,7 +50,7 @@ function AuthWrapper({ children }: { children: React.ReactNode }) {
 
 // Main content based on auth state
 function MainContent() {
-  const { user, profile, signOut } = useAuth();
+  const { user, signOut } = useAuth();
   const [authScreen, setAuthScreen] = useState<'login' | 'signup'>('login');
   const [appScreen, setAppScreen] = useState<'dashboard' | 'game'>('dashboard');
   const [gameState, setGameState] = useState<GameState>({
@@ -298,14 +298,12 @@ function MainContent() {
           onAnswer={answerQuestion}
           onNext={nextQuestion}
           character={gameState.progress.character!}
-          progress={gameState.progress}
         />
       )}
       
       {gameState.screen === 'result' && (
         <Result
           answers={gameState.answers}
-          question={gameState.currentQuestion!}
           onContinue={continueFromResult}
           character={gameState.progress.character!}
         />

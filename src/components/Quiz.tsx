@@ -12,7 +12,7 @@ interface Props {
   progress: UserProgress;
 }
 
-function Quiz({ question, questionIndex, totalQuestions, onAnswer, onNext, character, progress }: Props) {
+function Quiz({ question, questionIndex, totalQuestions, onAnswer, onNext, character }: Props) {
   const [selectedAnswer, setSelectedAnswer] = useState<string | null>(null);
   const [userInput, setUserInput] = useState('');
   const [isSpeaking, setIsSpeaking] = useState(false);
