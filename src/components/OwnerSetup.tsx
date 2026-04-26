@@ -25,7 +25,7 @@ export default function OwnerSetup({ onSetupComplete }: OwnerSetupProps) {
   const checkOwnerExists = async () => {
     try {
       // Check if there's already a super_admin
-      const { data, error } = await supabase
+      const { data } = await supabase
         .from('users')
         .select('*')
         .eq('role', 'super_admin')

@@ -131,7 +131,8 @@ export default function StudentManagement({ onClose }: StudentManagementProps) {
         await supabase.from('users').delete().eq('id', id);
         fetchStudents();
       } catch (profileErr) {
-        alert(profileErr.message);
+        const errMsg = profileErr instanceof Error ? profileErr.message : 'Unknown error';
+        alert(errMsg);
       }
     }
   };

@@ -12,7 +12,7 @@ interface DashboardProps {
   isAdminMode?: boolean;
 }
 
-export default function Dashboard({ onPlayGame, onLogout, isAdminMode = false }: DashboardProps) {
+export default function Dashboard({ onPlayGame, onLogout }: DashboardProps) {
   const { profile, user } = useAuth();
   const [stats, setStats] = useState({
     totalStudents: 0,

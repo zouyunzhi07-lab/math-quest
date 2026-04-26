@@ -17,7 +17,6 @@ import { supabase } from './supabase';
 import './App.css';
 
 const STORAGE_KEY = 'math-quest-progress';
-const OWNER_EMAIL = 'zouyunzhi07@gmail.com';
 
 const initialProgress: UserProgress = {
   character: null,

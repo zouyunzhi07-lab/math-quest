@@ -1,6 +1,5 @@
 import { useState } from 'react';
 import { useAuth } from '../AuthContext';
-import { supabase } from '../supabase';
 import './AdminLogin.css';
 
 interface AdminLoginProps {
