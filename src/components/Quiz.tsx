@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
-import { Question, Character } from '../types';
+import { Question, Character, UserProgress } from '../types';
 import './Quiz.css';
 
 interface Props {
