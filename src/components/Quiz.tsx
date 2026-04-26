@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
-import { Question, Character, UserProgress } from '../types';
+import { Question, Character } from '../types';
 import './Quiz.css';
 
 interface Props {
@@ -9,7 +9,7 @@ interface Props {
   onAnswer: (answer: string) => void;
   onNext: () => void;
   character: Character;
-  progress: UserProgress;
+  progress?: UserProgress;
 }
 
 function Quiz({ question, questionIndex, totalQuestions, onAnswer, onNext, character }: Props) {

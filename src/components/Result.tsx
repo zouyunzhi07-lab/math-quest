@@ -5,7 +5,7 @@ interface Answer { questionId: string; correct: boolean; }
 
 interface Props {
   answers: Answer[];
-  question: any;
+  question?: any;
   onContinue: () => void;
   character: Character;
 }

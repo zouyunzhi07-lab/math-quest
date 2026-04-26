@@ -39,7 +39,7 @@ function LoadingScreen() {
 
 // Auth wrapper component
 function AuthWrapper({ children }: { children: React.ReactNode }) {
-  const { user, loading } = useAuth();
+  const { loading } = useAuth();
 
   if (loading) {
     return <LoadingScreen />;
