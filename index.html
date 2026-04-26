@@ -658,19 +658,12 @@
                   <button class="debug-voices-btn" data-action="toggleVoiceDebug">
                     🔧 Show Available Voices
                   </button>
-                  ${showVoiceDebug ? `
-                    <div class="voice-debug-panel">
-                      <p class="debug-title">Available English Voices:</p>
-                      <div class="voice-list">
-                        ${speechSynthesis.getVoices().filter(v => v.lang.startsWith('en')).map(v => `
-                          <div class="voice-item">
-                            <span class="voice-name">${v.name}</span>
-                            <span class="voice-lang">${v.lang}</span>
-                          </div>
-                        `).join('')}
-                      </div>
+                  <div id="voiceDebugPanel" class="voice-debug-panel" style="display: ${showVoiceDebug ? 'block' : 'none'}">
+                    <p class="debug-title">Available English Voices:</p>
+                    <div id="voiceList" class="voice-list">
+                      <p class="debug-loading">Loading voices...</p>
                     </div>
-                  ` : ''}
+                  </div>
                 </div>
               ` : ''}
             </div>
@@ -1111,7 +1104,25 @@
       // Voice debug toggle
       document.querySelector('[data-action="toggleVoiceDebug"]')?.addEventListener('click', () => {
         showVoiceDebug = !showVoiceDebug;
-        render();
+        const panel = document.getElementById('voiceDebugPanel');
+        const list = document.getElementById('voiceList');
+        if (panel) {
+          panel.style.display = showVoiceDebug ? 'block' : 'none';
+        }
+        if (showVoiceDebug && list) {
+          // Populate voice list
+          const voices = speechSynthesis.getVoices().filter(v => v.lang.startsWith('en'));
+          if (voices.length === 0) {
+            list.innerHTML = '<p class="debug-loading">No voices loaded. Try refreshing.</p>';
+          } else {
+            list.innerHTML = voices.map(v => `
+              <div class="voice-item">
+                <span class="voice-name">${v.name}</span>
+                <span class="voice-lang">${v.lang}</span>
+              </div>
+            `).join('');
+          }
+        }
       });
 
       // Answer
@@ -1152,7 +1163,12 @@
     };
 
     // Load voices
-    speechSynthesis.onvoiceschanged = () => speechSynthesis.getVoices();
+    let loadedVoices = [];
+    speechSynthesis.onvoiceschanged = () => {
+      loadedVoices = speechSynthesis.getVoices();
+    };
+    // Initial load
+    loadedVoices = speechSynthesis.getVoices();
 
     // Initial render
     render();
