@@ -59,6 +59,11 @@ function Quiz({ question, questionIndex, totalQuestions, onAnswer, onMarkUnsure,
     localStorage.setItem(VOICE_STORAGE_KEY, voiceId);
   };
 
+  const handleMarkUnsure = () => {
+    setMarkedUnsure(true);
+    onMarkUnsure();
+  };
+
   const playTTS = () => {
     if (isSpeaking) {
       window.speechSynthesis.cancel();
