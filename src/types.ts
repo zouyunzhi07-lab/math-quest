@@ -32,5 +32,21 @@ export interface GameState {
   currentQuestion: Question | null;
   questionIndex: number;
   answers: { questionId: string; correct: boolean }[];
+  unsureQuestions: string[]; // Question IDs marked as unsure
   showReward: boolean;
+}
+
+export interface GameHistory {
+  id: string;
+  userId: string;
+  character: Character;
+  currentLevel: number;
+  currentMinorLevel: number;
+  status: 'in_progress' | 'completed';
+  totalPoints: number;
+  correctCount: number;
+  wrongCount: number;
+  unsureCount: number;
+  completedAt: string | null;
+  createdAt: string;
 }

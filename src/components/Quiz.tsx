@@ -7,24 +7,32 @@ interface Props {
   questionIndex: number;
   totalQuestions: number;
   onAnswer: (answer: string) => void;
+  onMarkUnsure: () => void;
   onNext: () => void;
   character: Character;
   progress?: UserProgress;
 }
 
-function Quiz({ question, questionIndex, totalQuestions, onAnswer, onNext, character }: Props) {
+function Quiz({ question, questionIndex, totalQuestions, onAnswer, onMarkUnsure, onNext, character }: Props) {
   const [selectedAnswer, setSelectedAnswer] = useState<string | null>(null);
   const [userInput, setUserInput] = useState('');
   const [isSpeaking, setIsSpeaking] = useState(false);
   const [showResult, setShowResult] = useState(false);
+  const [markedUnsure, setMarkedUnsure] = useState(false);
   const utteranceRef = useRef<SpeechSynthesisUtterance | null>(null);
 
   useEffect(() => {
     setSelectedAnswer(null);
     setUserInput('');
     setShowResult(false);
+    setMarkedUnsure(false);
     window.speechSynthesis.cancel();
   }, [question]);
+
+  const handleMarkUnsure = () => {
+    setMarkedUnsure(true);
+    onMarkUnsure();
+  };
 
   const playTTS = () => {
     if (isSpeaking) {
@@ -198,6 +206,16 @@ function Quiz({ question, questionIndex, totalQuestions, onAnswer, onNext, chara
               ))}
             </div>
           </div>
+        )}
+
+        {!showResult && !markedUnsure && (
+          <button className="unsure-btn" onClick={handleMarkUnsure}>
+            🤔 Mark as Unsure
+          </button>
+        )}
+
+        {markedUnsure && (
+          <div className="unsure-badge">🤔 Marked as Unsure</div>
         )}
 
         {showResult && (

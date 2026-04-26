@@ -158,6 +158,16 @@
   color: white;
 }
 
+.action-card.problem-bank {
+  background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+  color: white;
+}
+
+.action-card.students-management {
+  background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+  color: white;
+}
+
 .action-icon {
   font-size: 3rem;
 }
@@ -205,6 +215,23 @@
 .play-button:hover {
   transform: translateY(-3px) scale(1.05);
   box-shadow: 0 15px 40px rgba(102, 126, 234, 0.5);
+}
+
+/* Student Dashboard */
+.student-dashboard {
+  padding: 0 40px;
+  max-width: 800px;
+  margin: 0 auto;
+}
+
+.student-history-section {
+  margin-top: 40px;
+}
+
+@media (max-width: 768px) {
+  .student-dashboard {
+    padding: 0 20px;
+  }
 }
 
 /* Super Admin Panel */

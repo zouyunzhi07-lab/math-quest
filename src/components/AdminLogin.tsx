@@ -1,12 +1,13 @@
 import { useState } from 'react';
 import { useAuth } from '../AuthContext';
-import './Login.css';
+import { supabase } from '../supabase';
+import './AdminLogin.css';
 
-interface LoginProps {
-  onSwitchToSignup: () => void;
+interface AdminLoginProps {
+  onSwitchToPublic: () => void;
 }
 
-export default function Login({ onSwitchToSignup }: LoginProps) {
+export default function AdminLogin({ onSwitchToPublic }: AdminLoginProps) {
   const { signIn, loading, error, resetPassword } = useAuth();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -47,11 +48,11 @@ export default function Login({ onSwitchToSignup }: LoginProps) {
 
   if (showReset) {
     return (
-      <div className="login-container">
-        <div className="login-card">
-          <div className="login-header">
-            <h1 className="login-title">Reset Password</h1>
-            <p className="login-subtitle">We'll send you a reset link</p>
+      <div className="admin-login-container">
+        <div className="admin-login-card">
+          <div className="admin-login-header">
+            <h1 className="admin-login-title">Reset Password</h1>
+            <p className="admin-login-subtitle">Admin Portal</p>
           </div>
           
           {resetSent ? (
@@ -59,12 +60,13 @@ export default function Login({ onSwitchToSignup }: LoginProps) {
               <div className="success-icon">✓</div>
               <h2>Check your email</h2>
               <p>We've sent a password reset link to <strong>{email}</strong></p>
-              <button onClick={() => setShowReset(false)} className="link-button">
+              <p className="reset-note">Click the link in the email to reset your password.</p>
+              <button onClick={() => { setShowReset(false); setResetSent(false); }} className="back-button">
                 Back to Login
               </button>
             </div>
           ) : (
-            <form onSubmit={handlePasswordReset} className="login-form">
+            <form onSubmit={handlePasswordReset} className="admin-login-form">
               <div className="form-group">
                 <label htmlFor="reset-email">Email Address</label>
                 <input
@@ -72,14 +74,15 @@ export default function Login({ onSwitchToSignup }: LoginProps) {
                   type="email"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  placeholder="Enter your email"
-                  disabled={loading}
+                  placeholder="Enter your admin email"
                 />
               </div>
               
-              {localError && <div className="error-message">{localError}</div>}
+              {localError && (
+                <div className="error-message">{localError}</div>
+              )}
               
-              <button type="submit" className="login-button" disabled={loading}>
+              <button type="submit" className="admin-login-button">
                 Send Reset Link
               </button>
               
@@ -88,28 +91,34 @@ export default function Login({ onSwitchToSignup }: LoginProps) {
               </button>
             </form>
           )}
+          
+          <div className="admin-login-footer">
+            <button onClick={onSwitchToPublic} className="link-button">
+              ← Back to Student Login
+            </button>
+          </div>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="login-container">
-      <div className="login-card">
-        <div className="login-header">
-          <h1 className="login-title">Math Quest</h1>
-          <p className="login-subtitle">Nana & Jimi</p>
+    <div className="admin-login-container">
+      <div className="admin-login-card">
+        <div className="admin-login-header">
+          <h1 className="admin-login-title">Admin Portal</h1>
+          <p className="admin-login-subtitle">Math Quest Management</p>
         </div>
         
-        <form onSubmit={handleSubmit} className="login-form">
+        <form onSubmit={handleSubmit} className="admin-login-form">
           <div className="form-group">
-            <label htmlFor="email">Email</label>
+            <label htmlFor="email">Admin Email</label>
             <input
               id="email"
               type="email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              placeholder="Enter your email"
+              placeholder="Enter admin email"
               disabled={loading}
             />
           </div>
@@ -121,7 +130,7 @@ export default function Login({ onSwitchToSignup }: LoginProps) {
               type="password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
-              placeholder="Enter your password"
+              placeholder="Enter password"
               disabled={loading}
             />
           </div>
@@ -132,8 +141,8 @@ export default function Login({ onSwitchToSignup }: LoginProps) {
             </div>
           )}
           
-          <button type="submit" className="login-button" disabled={loading}>
-            {loading ? 'Signing in...' : 'Sign In'}
+          <button type="submit" className="admin-login-button" disabled={loading}>
+            {loading ? 'Signing in...' : 'Sign In as Admin'}
           </button>
           
           <button type="button" onClick={() => setShowReset(true)} className="link-button">
@@ -141,13 +150,13 @@ export default function Login({ onSwitchToSignup }: LoginProps) {
           </button>
         </form>
         
-        <div className="login-footer">
-          <p>
-            Don't have an account?{' '}
-            <button onClick={onSwitchToSignup} className="link-button">
-              Sign Up
-            </button>
+        <div className="admin-login-footer">
+          <p className="setup-link">
+            First time? <button onClick={() => window.location.href = '/setup'} className="link-button">Setup Admin Account</button>
           </p>
+          <button onClick={onSwitchToPublic} className="link-button">
+            ← Back to Student Login
+          </button>
         </div>
       </div>
     </div>

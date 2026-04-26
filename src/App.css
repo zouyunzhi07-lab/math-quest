@@ -58,3 +58,108 @@
   font-size: 1.1rem;
   font-weight: 600;
 }
+
+/* Auth Container */
+.auth-container {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+  padding: 20px;
+}
+
+.auth-tabs {
+  display: flex;
+  gap: 0;
+  margin-bottom: 20px;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 12px;
+  padding: 6px;
+}
+
+.auth-tab {
+  padding: 12px 24px;
+  background: transparent;
+  border: none;
+  color: rgba(255, 255, 255, 0.7);
+  font-size: 0.95rem;
+  font-weight: 600;
+  cursor: pointer;
+  border-radius: 8px;
+  transition: all 0.3s ease;
+}
+
+.auth-tab:hover {
+  color: white;
+}
+
+.auth-tab.active {
+  background: white;
+  color: #e94560;
+}
+
+.auth-tab.admin-tab {
+  color: #ffd700;
+}
+
+.auth-tab.admin-tab:hover {
+  color: #ffed4a;
+}
+
+.auth-tab.admin-tab.active {
+  background: #ffd700;
+  color: #1a1a2e;
+}
+
+/* Admin Access Denied */
+.admin-access-denied {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+  padding: 20px;
+}
+
+.access-denied-card {
+  background: white;
+  border-radius: 20px;
+  padding: 48px;
+  text-align: center;
+  max-width: 450px;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+}
+
+.access-denied-card h1 {
+  color: #e94560;
+  margin: 0 0 16px 0;
+}
+
+.access-denied-card p {
+  color: #666;
+  margin: 0 0 8px 0;
+}
+
+.access-denied-card .admin-note {
+  font-size: 0.9rem;
+  color: #888;
+  margin-bottom: 24px;
+}
+
+.logout-btn {
+  padding: 12px 32px;
+  background: #1a1a2e;
+  color: white;
+  border: none;
+  border-radius: 10px;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.3s;
+}
+
+.logout-btn:hover {
+  background: #2a2a4e;
+}

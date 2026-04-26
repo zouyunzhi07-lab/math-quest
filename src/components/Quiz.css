@@ -269,6 +269,39 @@
   transform: scale(1.02);
 }
 
+.unsure-btn {
+  display: block;
+  width: 100%;
+  margin-top: 1rem;
+  padding: 0.8rem;
+  background: linear-gradient(135deg, #FF9800, #F57C00);
+  color: white;
+  border-radius: 10px;
+  font-size: 0.95rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.unsure-btn:hover {
+  transform: scale(1.02);
+  box-shadow: 0 4px 15px rgba(255, 152, 0, 0.4);
+}
+
+.unsure-badge {
+  display: block;
+  width: 100%;
+  margin-top: 1rem;
+  padding: 0.8rem;
+  background: rgba(255, 152, 0, 0.2);
+  color: #E65100;
+  border: 2px solid #FF9800;
+  border-radius: 10px;
+  font-size: 0.95rem;
+  font-weight: 600;
+  text-align: center;
+}
+
 @media (max-width: 600px) {
   .quiz-content { padding: 1.2rem; }
   .question-text { font-size: 1.2rem; }

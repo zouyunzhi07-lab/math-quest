@@ -1,14 +1,18 @@
 import { useState, useEffect } from 'react';
 import { useAuth } from '../AuthContext';
 import { supabase } from '../supabase';
+import GameHistory from './GameHistory';
+import ProblemBank from './ProblemBank';
+import StudentManagement from './StudentManagement';
 import './Dashboard.css';
 
 interface DashboardProps {
   onPlayGame: () => void;
   onLogout: () => void;
+  isAdminMode?: boolean;
 }
 
-export default function Dashboard({ onPlayGame, onLogout }: DashboardProps) {
+export default function Dashboard({ onPlayGame, onLogout, isAdminMode = false }: DashboardProps) {
   const { profile, user } = useAuth();
   const [stats, setStats] = useState({
     totalStudents: 0,
@@ -76,15 +80,32 @@ export default function Dashboard({ onPlayGame, onLogout }: DashboardProps) {
       </header>
 
       {isAdmin ? (
-        <SuperAdminContent stats={stats} loading={loading} onPlayGame={onPlayGame} onRefresh={fetchStats} />
+        <SuperAdminContent 
+          stats={stats} 
+          loading={loading} 
+          onPlayGame={onPlayGame} 
+          onRefresh={fetchStats}
+          isSchoolAdmin={profile?.role === 'school_admin'}
+        />
       ) : (
-        <StudentContent onPlayGame={onPlayGame} />
+        <StudentContent onPlayGame={onPlayGame} userId={user?.id || ''} />
       )}
     </div>
   );
 }
 
-function SuperAdminContent({ stats, loading, onPlayGame, onRefresh }: any) {
+function SuperAdminContent({ stats, loading, onPlayGame, onRefresh, isSchoolAdmin }: any) {
+  const [showProblemBank, setShowProblemBank] = useState(false);
+  const [showStudentManagement, setShowStudentManagement] = useState(false);
+
+  if (showProblemBank) {
+    return <ProblemBank onClose={() => setShowProblemBank(false)} />;
+  }
+
+  if (showStudentManagement) {
+    return <StudentManagement onClose={() => setShowStudentManagement(false)} />;
+  }
+
   return (
     <>
       <div className="stats-grid">
@@ -117,20 +138,41 @@ function SuperAdminContent({ stats, loading, onPlayGame, onRefresh }: any) {
           <span className="action-text">Play Game</span>
           <span className="action-desc">Start learning math!</span>
         </button>
+
+        {isSchoolAdmin && (
+          <>
+            <button onClick={() => setShowStudentManagement(true)} className="action-card students-management">
+              <span className="action-icon">👥</span>
+              <span className="action-text">Students</span>
+              <span className="action-desc">Manage student accounts</span>
+            </button>
+            <button onClick={() => setShowProblemBank(true)} className="action-card problem-bank">
+              <span className="action-icon">📚</span>
+              <span className="action-text">Problem Bank</span>
+              <span className="action-desc">Manage questions and banks</span>
+            </button>
+          </>
+        )}
+
         <SuperAdminPanel onRefresh={onRefresh} />
       </div>
     </>
   );
 }
 
-function StudentContent({ onPlayGame }: any) {
+function StudentContent({ onPlayGame, userId }: { onPlayGame: () => void; userId: string }) {
   return (
-    <div className="welcome-section">
-      <h2>Ready to learn?</h2>
-      <p>Choose your character and start your math adventure!</p>
-      <button onClick={onPlayGame} className="play-button">
-        🎮 Start Playing
-      </button>
+    <div className="student-dashboard">
+      <div className="welcome-section">
+        <h2>Ready to learn?</h2>
+        <p>Choose your character and start your math adventure!</p>
+        <button onClick={onPlayGame} className="play-button">
+          🎮 Start Playing
+        </button>
+      </div>
+      <div className="student-history-section">
+        <GameHistory userId={userId} />
+      </div>
     </div>
   );
 }

@@ -9,12 +9,15 @@ import Quiz from './components/Quiz';
 import Result from './components/Result';
 import Reward from './components/Reward';
 import Admin from './components/Admin';
+import AdminLogin from './components/AdminLogin';
+import OwnerSetup from './components/OwnerSetup';
 import { getQuestionsForLevel } from './data';
 import type { GameState, Character, UserProgress } from './types';
 import { supabase } from './supabase';
 import './App.css';
 
 const STORAGE_KEY = 'math-quest-progress';
+const OWNER_EMAIL = 'zouyunzhi07@gmail.com';
 
 const initialProgress: UserProgress = {
   character: null,
@@ -50,15 +53,18 @@ function AuthWrapper({ children }: { children: React.ReactNode }) {
 
 // Main content based on auth state
 function MainContent() {
-  const { user, signOut } = useAuth();
+  const { user, signOut, profile } = useAuth();
   const [authScreen, setAuthScreen] = useState<'login' | 'signup'>('login');
   const [appScreen, setAppScreen] = useState<'dashboard' | 'game'>('dashboard');
+  const [isAdminRoute, setIsAdminRoute] = useState(false);
+  const [isSetupRoute, setIsSetupRoute] = useState(false);
   const [gameState, setGameState] = useState<GameState>({
     screen: 'select',
     progress: initialProgress,
     currentQuestion: null,
     questionIndex: 0,
     answers: [],
+    unsureQuestions: [],
     showReward: false,
   });
 
@@ -171,6 +177,18 @@ function MainContent() {
     });
   }, []);
 
+  const markQuestionUnsure = useCallback(() => {
+    setGameState(prev => {
+      if (!prev.currentQuestion) return prev;
+      if (prev.unsureQuestions.includes(prev.currentQuestion.id)) return prev;
+      
+      return {
+        ...prev,
+        unsureQuestions: [...prev.unsureQuestions, prev.currentQuestion.id],
+      };
+    });
+  }, []);
+
   const nextQuestion = () => {
     const { currentMajorLevel, currentMinorLevel } = gameState.progress;
     const levelQuestions = getQuestionsForLevel(currentMajorLevel, currentMinorLevel);
@@ -234,23 +252,92 @@ function MainContent() {
       currentQuestion: null,
       questionIndex: 0,
       answers: [],
+      unsureQuestions: [],
       showReward: false,
     });
   };
 
-  // Not logged in - show auth screens
-  if (!user) {
-    if (authScreen === 'login') {
+  // Check if this is admin route or setup route
+  useEffect(() => {
+    const path = window.location.pathname;
+    setIsAdminRoute(path.startsWith('/admin'));
+    setIsSetupRoute(path === '/setup');
+  }, []);
+
+  // Setup route
+  if (isSetupRoute) {
+    return (
+      <OwnerSetup onSetupComplete={() => window.location.href = '/admin'} />
+    );
+  }
+
+  // Admin route - handle admin login
+  if (isAdminRoute) {
+    if (!user) {
       return (
-        <Login 
-          onSwitchToSignup={() => setAuthScreen('signup')} 
+        <AdminLogin 
+          onSwitchToPublic={() => window.location.href = '/'}
         />
       );
     }
+    
+    // Admin must be super_admin or school_admin
+    const isAdmin = profile?.role === 'super_admin' || profile?.role === 'school_admin';
+    
+    if (!isAdmin) {
+      return (
+        <div className="admin-access-denied">
+          <div className="access-denied-card">
+            <h1>Access Denied</h1>
+            <p>You don't have permission to access the admin portal.</p>
+            <p className="admin-note">Only Super Admins and School Admins can access this area.</p>
+            <button onClick={handleLogout} className="logout-btn">
+              Logout
+            </button>
+          </div>
+        </div>
+      );
+    }
+    
     return (
-      <Signup 
-        onSwitchToLogin={() => setAuthScreen('login')} 
+      <Dashboard 
+        onPlayGame={handlePlayGame}
+        onLogout={handleLogout}
+        isAdminMode={true}
       />
+    );
+  }
+
+  // Not logged in - show auth screens
+  if (!user) {
+    return (
+      <div className="auth-container">
+        <div className="auth-tabs">
+          <button 
+            className={`auth-tab ${authScreen === 'login' ? 'active' : ''}`}
+            onClick={() => setAuthScreen('login')}
+          >
+            Sign In
+          </button>
+          <button 
+            className={`auth-tab ${authScreen === 'signup' ? 'active' : ''}`}
+            onClick={() => setAuthScreen('signup')}
+          >
+            Sign Up
+          </button>
+          <button 
+            className="auth-tab admin-tab"
+            onClick={() => window.location.href = '/admin'}
+          >
+            Admin
+          </button>
+        </div>
+        {authScreen === 'login' ? (
+          <Login onSwitchToSignup={() => setAuthScreen('signup')} />
+        ) : (
+          <Signup onSwitchToLogin={() => setAuthScreen('login')} />
+        )}
+      </div>
     );
   }
 
@@ -296,6 +383,7 @@ function MainContent() {
           questionIndex={gameState.questionIndex}
           totalQuestions={getQuestionsForLevel(gameState.progress.currentMajorLevel, gameState.progress.currentMinorLevel).length}
           onAnswer={answerQuestion}
+          onMarkUnsure={markQuestionUnsure}
           onNext={nextQuestion}
           character={gameState.progress.character!}
         />
