@@ -325,9 +325,9 @@
 
     // TTS Voice Settings
     const VOICE_OPTIONS = [
-      { id: 'male', label: 'Male', icon: '👨', voiceName: 'Microsoft David', pitch: 1, rate: 0.9 },
-      { id: 'female', label: 'Female', icon: '👩', voiceName: 'Microsoft Zira', pitch: 1.1, rate: 0.9 },
-      { id: 'girl', label: 'Cheerful Girl', icon: '👧', voiceName: 'Microsoft Aria', pitch: 1.3, rate: 1 },
+      { id: 'male', label: 'Male', icon: '👨', voiceNames: ['Microsoft David', 'Microsoft James', 'Microsoft Mark', 'Microsoft Ryan'], pitch: 1, rate: 0.9 },
+      { id: 'female', label: 'Female', icon: '👩', voiceNames: ['Microsoft Zira', 'Microsoft Ava', 'Microsoft Susan', 'Microsoft Emily', 'Microsoft Jenny'], pitch: 1.15, rate: 0.9 },
+      { id: 'girl', label: 'Cheerful Girl', icon: '👧', voiceNames: ['Microsoft Aria', 'Microsoft Sophie', 'Microsoft Nanami', 'Microsoft Jenny', 'Microsoft Saria'], pitch: 1.4, rate: 1.05 },
     ];
     const VOICE_STORAGE_KEY = 'math-quest-tts-voice';
     let selectedVoice = localStorage.getItem(VOICE_STORAGE_KEY) || 'female';
@@ -349,13 +349,22 @@
       utterance.pitch = voiceConfig.pitch;
       
       const voices = speechSynthesis.getVoices();
-      let preferredVoice = voices.find(v => v.name.includes(voiceConfig.voiceName));
+      
+      // Try to find any of the preferred voice names
+      let preferredVoice = voices.find(v => 
+        voiceConfig.voiceNames.some(name => v.name.includes(name))
+      );
+      
+      // Fallback: try any Microsoft English voice
       if (!preferredVoice) {
         preferredVoice = voices.find(v => v.name.includes('Microsoft') && v.lang.startsWith('en'));
       }
+      
+      // Fallback: try any English voice
       if (!preferredVoice) {
         preferredVoice = voices.find(v => v.lang.startsWith('en'));
       }
+      
       if (preferredVoice) utterance.voice = preferredVoice;
       
       utterance.onend = () => { isSpeaking = false; render(); };
