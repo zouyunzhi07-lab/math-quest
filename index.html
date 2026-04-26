@@ -105,6 +105,21 @@
     .tts-btn { background: var(--bg-secondary); color: var(--text-primary); padding: 0.6rem 1.2rem; border-radius: 8px; transition: all 0.2s; }
     .tts-btn:hover { background: var(--primary); }
     .tts-btn.speaking { background: var(--success); animation: pulse 1s infinite; }
+    .tts-controls { display: flex; gap: 0.5rem; justify-content: center; align-items: center; }
+    .voice-settings-btn { background: var(--bg-secondary); color: var(--text-primary); padding: 0.6rem 1rem; border-radius: 8px; font-size: 0.85rem; transition: all 0.2s; border: 1px solid transparent; }
+    .voice-settings-btn:hover { background: var(--secondary); border-color: var(--primary); }
+    .voice-settings-btn.active { background: var(--secondary); border-color: var(--primary); color: var(--primary); }
+    .voice-settings-panel { margin-top: 1rem; background: var(--bg-secondary); border-radius: 12px; padding: 1rem; border: 1px solid var(--primary); animation: fadeIn 0.2s; }
+    .voice-settings-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.8rem; font-weight: 600; }
+    .voice-settings-close { background: none; border: none; font-size: 1.5rem; color: var(--text-secondary); cursor: pointer; padding: 0; line-height: 1; }
+    .voice-settings-close:hover { color: var(--error); }
+    .voice-options { display: flex; gap: 0.5rem; flex-wrap: wrap; justify-content: center; }
+    .voice-option-btn { background: var(--bg-primary); color: var(--text-primary); padding: 0.6rem 1rem; border-radius: 20px; font-size: 0.85rem; transition: all 0.2s; display: flex; align-items: center; gap: 0.4rem; border: 2px solid transparent; }
+    .voice-option-btn:hover { background: var(--primary); transform: scale(1.05); }
+    .voice-option-btn.selected { background: var(--primary); border-color: var(--success); box-shadow: 0 0 10px rgba(107, 203, 119, 0.3); }
+    .voice-icon { font-size: 1.2rem; }
+    .voice-label { font-weight: 500; }
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(-10px); } to { opacity: 1; transform: translateY(0); } }
     .choices-grid { display: grid; gap: 0.8rem; }
     .choice-btn { background: var(--bg-secondary); padding: 1rem 1.5rem; border-radius: 12px; font-size: 1rem; text-align: left; display: flex; align-items: center; gap: 1rem; transition: all 0.2s; color: var(--text-primary); }
     .choice-btn:hover:not(:disabled) { background: var(--primary); transform: translateX(5px); }
@@ -308,6 +323,16 @@
       localStorage.setItem('math-quest-progress', JSON.stringify(progress));
     };
 
+    // TTS Voice Settings
+    const VOICE_OPTIONS = [
+      { id: 'male', label: 'Male', icon: '👨', voiceName: 'Microsoft David', pitch: 1, rate: 0.9 },
+      { id: 'female', label: 'Female', icon: '👩', voiceName: 'Microsoft Zira', pitch: 1.1, rate: 0.9 },
+      { id: 'girl', label: 'Cheerful Girl', icon: '👧', voiceName: 'Microsoft Aria', pitch: 1.3, rate: 1 },
+    ];
+    const VOICE_STORAGE_KEY = 'math-quest-tts-voice';
+    let selectedVoice = localStorage.getItem(VOICE_STORAGE_KEY) || 'female';
+    let showVoiceSettings = false;
+    
     // TTS
     let isSpeaking = false;
     const playTTS = (text) => {
@@ -317,12 +342,22 @@
         render();
         return;
       }
+      const voiceConfig = VOICE_OPTIONS.find(v => v.id === selectedVoice) || VOICE_OPTIONS[1];
       const utterance = new SpeechSynthesisUtterance(text);
       utterance.lang = 'en-US';
-      utterance.rate = 0.85;
+      utterance.rate = voiceConfig.rate;
+      utterance.pitch = voiceConfig.pitch;
+      
       const voices = speechSynthesis.getVoices();
-      const voice = voices.find(v => v.lang.startsWith('en')) || voices[0];
-      if (voice) utterance.voice = voice;
+      let preferredVoice = voices.find(v => v.name.includes(voiceConfig.voiceName));
+      if (!preferredVoice) {
+        preferredVoice = voices.find(v => v.name.includes('Microsoft') && v.lang.startsWith('en'));
+      }
+      if (!preferredVoice) {
+        preferredVoice = voices.find(v => v.lang.startsWith('en'));
+      }
+      if (preferredVoice) utterance.voice = preferredVoice;
+      
       utterance.onend = () => { isSpeaking = false; render(); };
       speechSynthesis.speak(utterance);
       isSpeaking = true;
@@ -563,6 +598,12 @@
       const total = getQuestionsForLevel(state.currentMajorLevel, state.currentMinorLevel).length;
       const typeLabel = q.type === 'choice' ? 'Multiple Choice' : q.type === 'fill' ? 'Fill in the Blank' : 'True or False';
       const charIcon = state.character === 'nana' ? '👧' : '👦';
+      const voiceOptionsHtml = VOICE_OPTIONS.map(opt => `
+        <button class="voice-option-btn ${selectedVoice === opt.id ? 'selected' : ''}" data-action="selectVoice" data-voice="${opt.id}">
+          <span class="voice-icon">${opt.icon}</span>
+          <span class="voice-label">${opt.label}</span>
+        </button>
+      `).join('');
       let html = `
         <div class="quiz fade-in">
           <div class="quiz-header">
@@ -576,9 +617,25 @@
             <div class="question-section">
               <span class="question-type">${typeLabel}</span>
               <h2 class="question-text">${q.question}</h2>
-              <button class="tts-btn ${isSpeaking ? 'speaking' : ''}" data-action="tts" data-text="${q.question}">
-                ${isSpeaking ? '🔊 Playing...' : '🔈 Play Question'}
-              </button>
+              <div class="tts-controls">
+                <button class="tts-btn ${isSpeaking ? 'speaking' : ''}" data-action="tts" data-text="${q.question}">
+                  ${isSpeaking ? '🔊 Playing...' : '🔈 Play'}
+                </button>
+                <button class="voice-settings-btn ${showVoiceSettings ? 'active' : ''}" data-action="toggleVoiceSettings">
+                  ⚙️ Voice
+                </button>
+              </div>
+              ${showVoiceSettings ? `
+                <div class="voice-settings-panel">
+                  <div class="voice-settings-header">
+                    <span>🎙️ Select Voice</span>
+                    <button class="voice-settings-close" data-action="toggleVoiceSettings">×</button>
+                  </div>
+                  <div class="voice-options">
+                    ${voiceOptionsHtml}
+                  </div>
+                </div>
+              ` : ''}
             </div>
       `;
       if (q.type === 'choice' && q.options) {
@@ -997,6 +1054,21 @@
       // TTS
       document.querySelector('[data-action="tts"]')?.addEventListener('click', (e) => {
         playTTS(e.target.dataset.text);
+      });
+
+      // Voice settings toggle
+      document.querySelector('[data-action="toggleVoiceSettings"]')?.addEventListener('click', () => {
+        showVoiceSettings = !showVoiceSettings;
+        render();
+      });
+
+      // Voice selection
+      document.querySelectorAll('[data-action="selectVoice"]').forEach(btn => {
+        btn.addEventListener('click', () => {
+          selectedVoice = btn.dataset.voice;
+          localStorage.setItem(VOICE_STORAGE_KEY, selectedVoice);
+          render();
+        });
       });
 
       // Answer
