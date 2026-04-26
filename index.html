@@ -119,6 +119,14 @@
     .voice-option-btn.selected { background: var(--primary); border-color: var(--success); box-shadow: 0 0 10px rgba(107, 203, 119, 0.3); }
     .voice-icon { font-size: 1.2rem; }
     .voice-label { font-weight: 500; }
+    .debug-voices-btn { margin-top: 0.8rem; background: var(--accent); color: #1a1a2e; padding: 0.5rem 1rem; border-radius: 8px; font-size: 0.85rem; font-weight: 600; width: 100%; }
+    .debug-voices-btn:hover { opacity: 0.8; }
+    .voice-debug-panel { margin-top: 1rem; background: var(--bg-primary); border-radius: 8px; padding: 0.8rem; max-height: 200px; overflow-y: auto; }
+    .debug-title { font-size: 0.8rem; color: var(--text-secondary); margin-bottom: 0.5rem; }
+    .voice-list { display: flex; flex-direction: column; gap: 0.3rem; }
+    .voice-item { display: flex; justify-content: space-between; font-size: 0.75rem; padding: 0.3rem; background: var(--bg-secondary); border-radius: 4px; }
+    .voice-name { color: var(--text-primary); word-break: break-all; }
+    .voice-lang { color: var(--primary); }
     @keyframes fadeIn { from { opacity: 0; transform: translateY(-10px); } to { opacity: 1; transform: translateY(0); } }
     .choices-grid { display: grid; gap: 0.8rem; }
     .choice-btn { background: var(--bg-secondary); padding: 1rem 1.5rem; border-radius: 12px; font-size: 1rem; text-align: left; display: flex; align-items: center; gap: 1rem; transition: all 0.2s; color: var(--text-primary); }
@@ -325,10 +333,14 @@
 
     // TTS Voice Settings
     const VOICE_OPTIONS = [
-      { id: 'male', label: 'Male', icon: '👨', voiceNames: ['Microsoft David', 'en-US-GuyNeural', 'en-US-EricNeural', 'en-US-ChristopherNeural'], pitch: 1, rate: 0.9 },
-      { id: 'female', label: 'Female', icon: '👩', voiceNames: ['en-US-JennyNeural', 'Microsoft Zira', 'en-US-AriaNeural', 'en-US-SaraNeural'], pitch: 1.1, rate: 0.9 },
-      { id: 'girl', label: 'Cheerful Girl', icon: '👧', voiceNames: ['en-US-AnaNeural', 'en-US-AriaNeural', 'en-US-MichelleNeural', 'Microsoft Ananya'], pitch: 1.3, rate: 1 },
+      { id: 'male', label: 'Male', icon: '👨', voiceNames: ['David', 'Guy', 'Eric', 'Christopher', 'Ryan', 'Mark', 'James'], pitch: 0.9, rate: 0.9 },
+      { id: 'female', label: 'Female', icon: '👩', voiceNames: ['Jenny', 'Zira', 'Sara', 'Samantha', 'Hazel', 'Aria', 'Michelle'], pitch: 1.1, rate: 0.9 },
+      { id: 'girl', label: 'Cheerful Girl', icon: '👧', voiceNames: ['Ana', 'Aria', 'Nancy', 'Katie', 'Sophie', 'Saria'], pitch: 1.4, rate: 1.1 },
     ];
+    const VOICE_STORAGE_KEY = 'math-quest-tts-voice';
+    let selectedVoice = localStorage.getItem(VOICE_STORAGE_KEY) || 'female';
+    let showVoiceSettings = false;
+    let showVoiceDebug = false; // Debug mode to show all voices
     const VOICE_STORAGE_KEY = 'math-quest-tts-voice';
     let selectedVoice = localStorage.getItem(VOICE_STORAGE_KEY) || 'female';
     let showVoiceSettings = false;
@@ -643,6 +655,22 @@
                   <div class="voice-options">
                     ${voiceOptionsHtml}
                   </div>
+                  <button class="debug-voices-btn" data-action="toggleVoiceDebug">
+                    🔧 Show Available Voices
+                  </button>
+                  ${showVoiceDebug ? `
+                    <div class="voice-debug-panel">
+                      <p class="debug-title">Available English Voices:</p>
+                      <div class="voice-list">
+                        ${speechSynthesis.getVoices().filter(v => v.lang.startsWith('en')).map(v => `
+                          <div class="voice-item">
+                            <span class="voice-name">${v.name}</span>
+                            <span class="voice-lang">${v.lang}</span>
+                          </div>
+                        `).join('')}
+                      </div>
+                    </div>
+                  ` : ''}
                 </div>
               ` : ''}
             </div>
@@ -1078,6 +1106,12 @@
           localStorage.setItem(VOICE_STORAGE_KEY, selectedVoice);
           render();
         });
+      });
+
+      // Voice debug toggle
+      document.querySelector('[data-action="toggleVoiceDebug"]')?.addEventListener('click', () => {
+        showVoiceDebug = !showVoiceDebug;
+        render();
       });
 
       // Answer

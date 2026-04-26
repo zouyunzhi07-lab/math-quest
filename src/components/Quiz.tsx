@@ -15,9 +15,9 @@ interface VoiceOption {
 }
 
 const VOICE_OPTIONS: VoiceOption[] = [
-  { id: 'male', label: 'Male', icon: '👨', voiceNames: ['Microsoft David', 'en-US-GuyNeural', 'en-US-EricNeural', 'en-US-ChristopherNeural'], pitch: 1, rate: 0.9 },
-  { id: 'female', label: 'Female', icon: '👩', voiceNames: ['en-US-JennyNeural', 'Microsoft Zira', 'en-US-AriaNeural', 'en-US-SaraNeural'], pitch: 1.1, rate: 0.9 },
-  { id: 'girl', label: 'Cheerful Girl', icon: '👧', voiceNames: ['en-US-AnaNeural', 'en-US-AriaNeural', 'en-US-MichelleNeural', 'Microsoft Ananya'], pitch: 1.3, rate: 1 },
+  { id: 'male', label: 'Male', icon: '👨', voiceNames: ['David', 'Guy', 'Eric', 'Christopher', 'Ryan', 'Mark', 'James'], pitch: 0.9, rate: 0.9 },
+  { id: 'female', label: 'Female', icon: '👩', voiceNames: ['Jenny', 'Zira', 'Sara', 'Samantha', 'Hazel', 'Aria', 'Michelle'], pitch: 1.1, rate: 0.9 },
+  { id: 'girl', label: 'Cheerful Girl', icon: '👧', voiceNames: ['Ana', 'Aria', 'Nancy', 'Katie', 'Sophie', 'Saria'], pitch: 1.4, rate: 1.1 },
 ];
 
 const VOICE_STORAGE_KEY = 'math-quest-tts-voice';
@@ -44,6 +44,7 @@ function Quiz({ question, questionIndex, totalQuestions, onAnswer, onMarkUnsure,
     return (saved as VoiceType) || 'female';
   });
   const [showVoiceSettings, setShowVoiceSettings] = useState(false);
+  const [showVoiceDebug, setShowVoiceDebug] = useState(false);
   const utteranceRef = useRef<SpeechSynthesisUtterance | null>(null);
 
   useEffect(() => {
@@ -193,6 +194,24 @@ function Quiz({ question, questionIndex, totalQuestions, onAnswer, onMarkUnsure,
                   </button>
                 ))}
               </div>
+              <button className="debug-voices-btn" onClick={() => setShowVoiceDebug(!showVoiceDebug)}>
+                🔧 Show Available Voices
+              </button>
+              {showVoiceDebug && (
+                <div className="voice-debug-panel">
+                  <p className="debug-title">Available English Voices:</p>
+                  <div className="voice-list">
+                    {window.speechSynthesis.getVoices()
+                      .filter(v => v.lang.startsWith('en'))
+                      .map((v, idx) => (
+                        <div key={idx} className="voice-item">
+                          <span className="voice-name">{v.name}</span>
+                          <span className="voice-lang">{v.lang}</span>
+                        </div>
+                      ))}
+                  </div>
+                </div>
+              )}
             </div>
           )}
         </div>
