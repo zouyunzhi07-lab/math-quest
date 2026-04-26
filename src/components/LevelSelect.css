@@ -1,0 +1,165 @@
+.level-select {
+  min-height: 100vh;
+  padding: 1.5rem;
+  max-width: 900px;
+  margin: 0 auto;
+}
+
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 2rem;
+  flex-wrap: wrap;
+  gap: 1rem;
+}
+
+.player-info {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.player-avatar {
+  width: 60px;
+  height: 60px;
+  background: var(--bg-card);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 2rem;
+  border: 3px solid var(--primary);
+}
+
+.player-stats h3 {
+  font-size: 1.3rem;
+  margin-bottom: 0.2rem;
+}
+
+.player-stats .stage {
+  color: var(--accent);
+  font-size: 0.9rem;
+}
+
+.player-stats .points {
+  color: var(--success);
+  font-size: 0.85rem;
+}
+
+.header-actions {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.btn-admin, .btn-reset {
+  padding: 0.5rem 1rem;
+  border-radius: 8px;
+  font-size: 0.9rem;
+  transition: all 0.2s;
+}
+
+.btn-admin {
+  background: var(--bg-card);
+  color: var(--text-secondary);
+}
+
+.btn-reset {
+  background: var(--error);
+  color: white;
+}
+
+.btn-admin:hover, .btn-reset:hover {
+  transform: scale(1.05);
+}
+
+.level-header {
+  text-align: center;
+  margin-bottom: 2rem;
+}
+
+.level-header h2 {
+  font-size: 2rem;
+  margin-bottom: 0.5rem;
+  background: linear-gradient(135deg, var(--primary), var(--secondary));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.level-header p {
+  color: var(--text-secondary);
+}
+
+.levels-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+  gap: 1.5rem;
+  margin-bottom: 2rem;
+}
+
+.level-section {
+  background: var(--bg-card);
+  border-radius: 16px;
+  padding: 1rem;
+}
+
+.level-title {
+  font-size: 1rem;
+  margin-bottom: 0.8rem;
+  color: var(--accent);
+  text-align: center;
+}
+
+.level-buttons {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 0.4rem;
+}
+
+.level-btn {
+  aspect-ratio: 1;
+  border-radius: 8px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  transition: all 0.2s;
+}
+
+.level-btn.locked {
+  background: #333;
+  color: #666;
+  cursor: not-allowed;
+}
+
+.level-btn.unlocked {
+  background: var(--primary);
+  color: white;
+}
+
+.level-btn.unlocked:hover {
+  background: var(--primary-dark);
+  transform: scale(1.1);
+}
+
+.level-btn.completed {
+  background: var(--success);
+}
+
+.vocab-tip {
+  background: var(--bg-card);
+  border-radius: 12px;
+  padding: 1rem;
+  text-align: center;
+  color: var(--text-secondary);
+  font-size: 0.95rem;
+}
+
+@media (max-width: 600px) {
+  .levels-grid {
+    grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
+    gap: 1rem;
+  }
+  .level-btn {
+    font-size: 0.75rem;
+  }
+}

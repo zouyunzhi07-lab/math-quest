@@ -1,0 +1,854 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Math Quest: Nana & Jimi</title>
+  <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&family=Nunito:wght@400;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --primary: #6C63FF;
+      --primary-dark: #5A52D5;
+      --secondary: #FF6B9D;
+      --accent: #FFD93D;
+      --success: #6BCB77;
+      --error: #FF6B6B;
+      --bg-primary: #1a1a2e;
+      --bg-secondary: #16213e;
+      --bg-card: #0f3460;
+      --text-primary: #ffffff;
+      --text-secondary: #a0a0a0;
+    }
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: 'Nunito', sans-serif; background: linear-gradient(135deg, var(--bg-primary), var(--bg-secondary)); min-height: 100vh; color: var(--text-primary); }
+    h1, h2, h3 { font-family: 'Fredoka', sans-serif; }
+    button { font-family: 'Nunito', sans-serif; cursor: pointer; border: none; outline: none; }
+    input, select, textarea { font-family: 'Nunito', sans-serif; outline: none; }
+    
+    @keyframes float { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-10px); } }
+    @keyframes pulse { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.05); } }
+    @keyframes slideIn { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+    @keyframes bounce { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-20px); } }
+    
+    .fade-in { animation: slideIn 0.5s ease-out; }
+    .app { min-height: 100vh; }
+    
+    /* Character Select */
+    .character-select { min-height: 100vh; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 2rem; }
+    .game-title { font-size: 3.5rem; background: linear-gradient(135deg, var(--primary), var(--secondary), var(--accent)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; animation: pulse 2s infinite; }
+    .subtitle { font-size: 1.2rem; color: var(--text-secondary); margin-top: 0.5rem; }
+    .instruction { font-size: 1.5rem; margin: 2rem 0; color: var(--accent); }
+    .characters { display: flex; gap: 3rem; flex-wrap: wrap; justify-content: center; }
+    .character-card { background: linear-gradient(145deg, var(--bg-card), var(--bg-secondary)); border-radius: 24px; padding: 2.5rem 2rem; width: 220px; text-align: center; transition: all 0.3s; position: relative; overflow: hidden; }
+    .character-card::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 4px; background: linear-gradient(90deg, var(--primary), var(--secondary)); }
+    .character-card:hover { transform: translateY(-10px); box-shadow: 0 20px 40px rgba(108, 99, 255, 0.3); }
+    .character-card h2 { font-size: 1.8rem; margin: 1rem 0 0.5rem; }
+    .character-card p { color: var(--text-secondary); }
+    .avatar-icon { font-size: 5rem; display: block; animation: float 3s ease-in-out infinite; }
+    
+    /* Level Select */
+    .level-select { min-height: 100vh; padding: 1.5rem; max-width: 900px; margin: 0 auto; }
+    .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem; flex-wrap: wrap; gap: 1rem; }
+    .player-info { display: flex; align-items: center; gap: 1rem; }
+    .player-avatar { width: 60px; height: 60px; background: var(--bg-card); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 2rem; border: 3px solid var(--primary); }
+    .player-stats h3 { font-size: 1.3rem; }
+    .stage { color: var(--accent); font-size: 0.9rem; }
+    .points { color: var(--success); font-size: 0.85rem; }
+    .level-header { text-align: center; margin-bottom: 2rem; }
+    .level-header h2 { font-size: 2rem; background: linear-gradient(135deg, var(--primary), var(--secondary)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+    .levels-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 1.5rem; margin-bottom: 2rem; }
+    .level-section { background: var(--bg-card); border-radius: 16px; padding: 1rem; }
+    .level-title { font-size: 1rem; margin-bottom: 0.8rem; color: var(--accent); text-align: center; }
+    .level-buttons { display: grid; grid-template-columns: repeat(5, 1fr); gap: 0.4rem; }
+    .level-btn { aspect-ratio: 1; border-radius: 8px; font-size: 0.85rem; font-weight: 600; transition: all 0.2s; }
+    .level-btn.locked { background: #333; color: #666; cursor: not-allowed; }
+    .level-btn.unlocked { background: var(--primary); color: white; }
+    .level-btn.unlocked:hover { background: var(--primary-dark); transform: scale(1.1); }
+    .level-btn.completed { background: var(--success); }
+    
+    /* Quiz */
+    .quiz { min-height: 100vh; padding: 1.5rem; max-width: 700px; margin: 0 auto; }
+    .quiz-header { margin-bottom: 2rem; }
+    .quiz-info { display: flex; align-items: center; gap: 1rem; margin-bottom: 0.8rem; }
+    .character-badge { font-size: 2rem; background: var(--bg-card); padding: 0.5rem; border-radius: 12px; }
+    .progress-bar { height: 8px; background: var(--bg-card); border-radius: 4px; overflow: hidden; }
+    .progress-fill { height: 100%; background: linear-gradient(90deg, var(--primary), var(--secondary)); transition: width 0.3s; }
+    .quiz-content { background: var(--bg-card); border-radius: 24px; padding: 2rem; }
+    .question-section { text-align: center; margin-bottom: 2rem; }
+    .question-type { display: inline-block; background: var(--primary); padding: 0.4rem 1rem; border-radius: 20px; font-size: 0.85rem; margin-bottom: 1rem; }
+    .question-text { font-size: 1.5rem; line-height: 1.5; margin-bottom: 1rem; }
+    .tts-btn { background: var(--bg-secondary); color: var(--text-primary); padding: 0.6rem 1.2rem; border-radius: 8px; transition: all 0.2s; }
+    .tts-btn:hover { background: var(--primary); }
+    .tts-btn.speaking { background: var(--success); animation: pulse 1s infinite; }
+    .choices-grid { display: grid; gap: 0.8rem; }
+    .choice-btn { background: var(--bg-secondary); padding: 1rem 1.5rem; border-radius: 12px; font-size: 1rem; text-align: left; display: flex; align-items: center; gap: 1rem; transition: all 0.2s; color: var(--text-primary); }
+    .choice-btn:hover:not(:disabled) { background: var(--primary); transform: translateX(5px); }
+    .choice-btn.correct { background: var(--success); }
+    .choice-btn.wrong { background: var(--error); }
+    .choice-letter { width: 30px; height: 30px; background: rgba(255,255,255,0.2); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 600; }
+    .fill-section { display: flex; flex-direction: column; gap: 1rem; align-items: center; }
+    .fill-input { width: 100%; max-width: 300px; padding: 1rem; border-radius: 12px; border: 2px solid var(--bg-secondary); background: var(--bg-secondary); color: var(--text-primary); font-size: 1.2rem; text-align: center; }
+    .fill-input:focus { border-color: var(--primary); }
+    .submit-btn { background: var(--primary); color: white; padding: 0.8rem 2rem; border-radius: 10px; font-size: 1rem; font-weight: 600; }
+    .boolean-buttons { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+    .bool-btn { padding: 1.5rem; border-radius: 16px; font-size: 1.3rem; font-weight: 600; color: white; }
+    .true-btn { background: var(--success); }
+    .false-btn { background: var(--error); }
+    .explanation { margin-top: 1.5rem; padding: 1.2rem; border-radius: 12px; text-align: left; }
+    .explanation.correct { background: rgba(107, 203, 119, 0.2); border: 1px solid var(--success); }
+    .explanation.wrong { background: rgba(255, 107, 107, 0.2); border: 1px solid var(--error); }
+    .vocabulary { margin-top: 0.8rem; display: flex; flex-wrap: wrap; gap: 0.5rem; align-items: center; }
+    .vocab-word { background: var(--primary); padding: 0.3rem 0.8rem; border-radius: 15px; font-size: 0.85rem; }
+    .next-btn { display: block; width: 100%; margin-top: 1.5rem; padding: 1rem; background: linear-gradient(135deg, var(--primary), var(--secondary)); color: white; border-radius: 12px; font-size: 1.1rem; font-weight: 600; }
+    
+    /* Result */
+    .result { min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 2rem; }
+    .result-card { background: var(--bg-card); border-radius: 24px; padding: 2.5rem; text-align: center; max-width: 400px; width: 100%; }
+    .result-header { display: flex; align-items: center; justify-content: center; gap: 0.8rem; margin-bottom: 1.5rem; }
+    .result-header h2 { font-size: 1.5rem; color: var(--accent); }
+    .result-icon { font-size: 4rem; margin-bottom: 1rem; animation: bounce 1s infinite; }
+    .result-title { font-size: 2rem; background: linear-gradient(135deg, var(--primary), var(--secondary)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+    .result-subtitle { color: var(--text-secondary); margin-bottom: 2rem; }
+    .score-circle { width: 140px; height: 140px; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 1.5rem; }
+    .score-inner { width: 110px; height: 110px; background: var(--bg-secondary); border-radius: 50%; display: flex; flex-direction: column; align-items: center; justify-content: center; }
+    .score-number { font-size: 2rem; font-weight: 700; }
+    .score-label { font-size: 0.9rem; color: var(--text-secondary); }
+    .answer-summary { display: flex; justify-content: center; gap: 0.5rem; flex-wrap: wrap; margin-bottom: 1.5rem; }
+    .answer-dot { width: 30px; height: 30px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 0.8rem; font-weight: 600; }
+    .answer-dot.correct { background: var(--success); }
+    .answer-dot.wrong { background: var(--error); }
+    .status-badge { display: inline-block; padding: 0.6rem 1.5rem; border-radius: 20px; font-weight: 600; font-size: 1.1rem; margin-bottom: 1.5rem; }
+    .status-badge.passed { background: var(--success); }
+    .status-badge.failed { background: var(--error); }
+    .continue-btn { width: 100%; padding: 1rem; background: linear-gradient(135deg, var(--primary), var(--secondary)); color: white; border-radius: 12px; font-size: 1.1rem; font-weight: 600; }
+    
+    /* Reward */
+    .reward-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.8); display: flex; align-items: center; justify-content: center; z-index: 1000; }
+    .reward-modal { background: linear-gradient(145deg, var(--bg-card), var(--bg-secondary)); border-radius: 24px; padding: 2rem; max-width: 400px; width: 90%; animation: slideIn 0.5s; }
+    .reward-content { text-align: center; }
+    .reward-header { margin-bottom: 1.5rem; }
+    .reward-header h2 { font-size: 2rem; color: var(--accent); }
+    .character-evolution { display: flex; flex-direction: column; align-items: center; gap: 0.8rem; padding: 1.5rem; border: 3px solid var(--primary); border-radius: 20px; margin-bottom: 1.5rem; background: var(--bg-secondary); }
+    .evolution-icon { font-size: 4rem; animation: bounce 1.5s infinite; }
+    .evolution-badge { background: var(--primary); padding: 0.4rem 1rem; border-radius: 15px; font-weight: 600; font-size: 0.9rem; color: #1a1a2e; }
+    .reward-message { background: var(--bg-primary); padding: 1rem; border-radius: 12px; margin-bottom: 1rem; }
+    .collect-btn { width: 100%; padding: 1rem; background: linear-gradient(135deg, var(--accent), #FFA500); color: #1a1a2e; border-radius: 12px; font-size: 1.1rem; font-weight: 700; }
+    
+    /* Admin */
+    .admin { min-height: 100vh; padding: 1.5rem; max-width: 1000px; margin: 0 auto; }
+    .admin-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem; flex-wrap: wrap; gap: 1rem; }
+    .admin-header h1 { font-size: 1.5rem; color: var(--accent); }
+    .back-btn, .add-btn, .btn-reset, .cancel-btn, .save-btn, .delete-btn, .edit-btn { padding: 0.6rem 1.2rem; border-radius: 8px; font-size: 0.9rem; font-weight: 600; border: none; cursor: pointer; }
+    .back-btn, .cancel-btn { background: var(--bg-card); color: var(--text-primary); }
+    .add-btn, .save-btn { background: var(--success); color: white; }
+    .edit-btn { background: var(--primary); color: white; }
+    .delete-btn { background: var(--error); color: white; }
+    .btn-reset { background: var(--error); color: white; }
+    
+    .admin-toolbar { display: flex; gap: 1rem; margin-bottom: 1rem; flex-wrap: wrap; align-items: center; }
+    .admin-toolbar select { padding: 0.5rem 1rem; border-radius: 8px; background: var(--bg-card); color: var(--text-primary); border: 1px solid var(--bg-secondary); }
+    .admin-toolbar .count { color: var(--text-secondary); font-size: 0.9rem; }
+    
+    .questions-list { display: flex; flex-direction: column; gap: 1rem; }
+    .question-item { background: var(--bg-card); border-radius: 12px; padding: 1rem; }
+    .question-meta { display: flex; gap: 0.5rem; margin-bottom: 0.5rem; align-items: center; flex-wrap: wrap; }
+    .level-badge { background: var(--primary); padding: 0.2rem 0.6rem; border-radius: 6px; font-size: 0.8rem; font-weight: 600; }
+    .type-badge { padding: 0.2rem 0.5rem; border-radius: 4px; font-size: 0.75rem; font-weight: 600; background: #6C63FF; }
+    .type-badge.fill { background: #FF6B9D; }
+    .type-badge.boolean { background: #FFD93D; color: #1a1a2e; }
+    .question-preview { color: var(--text-primary); margin-bottom: 0.8rem; line-height: 1.4; }
+    .question-actions { display: flex; gap: 0.5rem; flex-wrap: wrap; }
+    
+    /* Edit Form Modal */
+    .modal-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.8); display: flex; align-items: center; justify-content: center; z-index: 1000; padding: 1rem; }
+    .modal { background: var(--bg-card); border-radius: 16px; padding: 2rem; max-width: 600px; width: 100%; max-height: 90vh; overflow-y: auto; }
+    .modal h2 { margin-bottom: 1.5rem; color: var(--accent); }
+    .form-group { margin-bottom: 1rem; }
+    .form-group label { display: block; margin-bottom: 0.5rem; font-weight: 600; }
+    .form-group input, .form-group select, .form-group textarea { width: 100%; padding: 0.8rem; border-radius: 8px; background: var(--bg-secondary); color: var(--text-primary); border: 1px solid transparent; }
+    .form-group input:focus, .form-group select:focus, .form-group textarea:focus { border-color: var(--primary); }
+    .form-group textarea { min-height: 80px; resize: vertical; }
+    .form-row { display: flex; gap: 1rem; flex-wrap: wrap; }
+    .form-row .form-group { flex: 1; min-width: 100px; }
+    .options-group { display: grid; grid-template-columns: 1fr 1fr; gap: 0.5rem; }
+    .options-group input { flex: 1; }
+    .modal-actions { display: flex; gap: 1rem; justify-content: flex-end; margin-top: 1.5rem; }
+    .vocab-input { display: flex; gap: 0.5rem; }
+    .vocab-input input { flex: 1; }
+    .vocab-tags { display: flex; flex-wrap: wrap; gap: 0.5rem; margin-top: 0.5rem; }
+    .vocab-tag { background: var(--primary); padding: 0.3rem 0.8rem; border-radius: 15px; font-size: 0.85rem; display: flex; align-items: center; gap: 0.5rem; }
+    .vocab-tag span { cursor: pointer; color: #fff; }
+    .vocab-tag span:hover { color: var(--error); }
+
+    .hidden { display: none !important; }
+    @media (max-width: 600px) { 
+      .game-title { font-size: 2.5rem; } 
+      .characters { gap: 1.5rem; } 
+      .character-card { width: 160px; padding: 1.5rem 1rem; } 
+      .avatar-icon { font-size: 3.5rem; }
+      .modal { padding: 1rem; }
+      .options-group { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+  <div id="app" class="app"></div>
+
+  <script>
+    // Question Bank - EDITABLE
+    let questions = [
+      { id: '1-1-1', majorLevel: 1, minorLevel: 1, type: 'choice', question: 'What is the SUM of 5 and 3?', options: ['6', '7', '8', '9'], correctAnswer: '8', explanation: '5 + 3 = 8. "Sum" means the result of addition.', vocabulary: ['sum', 'addition', 'plus', 'add'] },
+      { id: '1-1-2', majorLevel: 1, minorLevel: 1, type: 'fill', question: '12 + 7 = ___', correctAnswer: '19', explanation: '12 + 7 = 19', vocabulary: ['addition', 'total'] },
+      { id: '1-1-3', majorLevel: 1, minorLevel: 1, type: 'boolean', question: 'Is 15 the SUM of 8 and 7?', correctAnswer: 'true', explanation: '8 + 7 = 15, so this is TRUE.', vocabulary: ['sum', 'addition'] },
+      { id: '1-1-4', majorLevel: 1, minorLevel: 1, type: 'choice', question: 'If you ADD 6 to 9, what is the RESULT?', options: ['13', '14', '15', '16'], correctAnswer: '15', explanation: '9 + 6 = 15. "Result" is the answer to a math problem.', vocabulary: ['add', 'result', 'total'] },
+      { id: '1-1-5', majorLevel: 1, minorLevel: 1, type: 'fill', question: '___ + 4 = 11', correctAnswer: '7', explanation: '7 + 4 = 11', vocabulary: ['unknown', 'missing number'] },
+      { id: '1-2-1', majorLevel: 1, minorLevel: 2, type: 'choice', question: 'What is the DIFFERENCE between 9 and 4?', options: ['3', '4', '5', '6'], correctAnswer: '5', explanation: '9 - 4 = 5. "Difference" means the result of subtraction.', vocabulary: ['difference', 'subtraction', 'minus', 'subtract'] },
+      { id: '1-2-2', majorLevel: 1, minorLevel: 2, type: 'fill', question: '15 - 8 = ___', correctAnswer: '7', explanation: '15 - 8 = 7', vocabulary: ['subtraction', 'minus'] },
+      { id: '1-2-3', majorLevel: 1, minorLevel: 2, type: 'boolean', question: 'Is 6 the DIFFERENCE when you subtract 5 from 11?', correctAnswer: 'true', explanation: '11 - 5 = 6, so this is TRUE.', vocabulary: ['difference', 'subtract'] },
+      { id: '1-2-4', majorLevel: 1, minorLevel: 2, type: 'choice', question: 'What is 20 MINUS 12?', options: ['6', '7', '8', '9'], correctAnswer: '8', explanation: '20 - 12 = 8', vocabulary: ['minus', 'subtract', 'take away'] },
+      { id: '1-2-5', majorLevel: 1, minorLevel: 2, type: 'fill', question: '___ - 6 = 9', correctAnswer: '15', explanation: '15 - 6 = 9', vocabulary: ['unknown', 'missing number'] },
+      { id: '1-3-1', majorLevel: 1, minorLevel: 3, type: 'choice', question: 'What is the PRODUCT of 4 and 3?', options: ['10', '11', '12', '13'], correctAnswer: '12', explanation: '4 × 3 = 12. "Product" means the result of multiplication.', vocabulary: ['product', 'multiplication', 'times', 'multiply'] },
+      { id: '1-3-2', majorLevel: 1, minorLevel: 3, type: 'fill', question: '5 TIMES 4 = ___', correctAnswer: '20', explanation: '5 × 4 = 20', vocabulary: ['times', 'multiply'] },
+      { id: '1-3-3', majorLevel: 1, minorLevel: 3, type: 'boolean', question: 'Is 24 the PRODUCT of 6 and 4?', correctAnswer: 'true', explanation: '6 × 4 = 24, so this is TRUE.', vocabulary: ['product', 'multiply'] },
+      { id: '1-3-4', majorLevel: 1, minorLevel: 3, type: 'choice', question: '3 multiplied by 7 equals ___', options: ['18', '20', '21', '24'], correctAnswer: '21', explanation: '3 × 7 = 21', vocabulary: ['multiplied by', 'multiply'] },
+      { id: '1-3-5', majorLevel: 1, minorLevel: 3, type: 'fill', question: '___ × 5 = 25', correctAnswer: '5', explanation: '5 × 5 = 25', vocabulary: ['multiplication', 'times'] },
+      { id: '1-4-1', majorLevel: 1, minorLevel: 4, type: 'choice', question: 'What is 20 DIVIDED BY 4?', options: ['4', '5', '6', '7'], correctAnswer: '5', explanation: '20 ÷ 4 = 5. "Divided by" means division.', vocabulary: ['divided by', 'division', 'quotient'] },
+      { id: '1-4-2', majorLevel: 1, minorLevel: 4, type: 'fill', question: '18 ÷ 3 = ___', correctAnswer: '6', explanation: '18 ÷ 3 = 6', vocabulary: ['division', 'quotient'] },
+      { id: '1-4-3', majorLevel: 1, minorLevel: 4, type: 'boolean', question: 'Is 7 the QUOTIENT of 35 divided by 5?', correctAnswer: 'true', explanation: '35 ÷ 5 = 7, so this is TRUE.', vocabulary: ['quotient', 'divided by'] },
+      { id: '1-4-4', majorLevel: 1, minorLevel: 4, type: 'choice', question: 'What is the quotient when 24 is divided by 6?', options: ['3', '4', '5', '6'], correctAnswer: '4', explanation: '24 ÷ 6 = 4', vocabulary: ['quotient', 'divided'] },
+      { id: '1-4-5', majorLevel: 1, minorLevel: 4, type: 'fill', question: '___ ÷ 7 = 3', correctAnswer: '21', explanation: '21 ÷ 7 = 3', vocabulary: ['division', 'quotient'] },
+      { id: '1-5-1', majorLevel: 1, minorLevel: 5, type: 'choice', question: 'What is 8 + 4 × 2? (Remember: multiply first!)', options: ['16', '24', '12', '20'], correctAnswer: '16', explanation: '4 × 2 = 8, then 8 + 8 = 16. Multiplication before addition!', vocabulary: ['operation', 'order', 'multiply', 'add'] },
+      { id: '1-5-2', majorLevel: 1, minorLevel: 5, type: 'fill', question: '15 - 3 × 4 = ___', correctAnswer: '3', explanation: '3 × 4 = 12, then 15 - 12 = 3', vocabulary: ['multiplication', 'subtraction'] },
+      { id: '1-5-3', majorLevel: 1, minorLevel: 5, type: 'boolean', question: 'Is 10 + 5 × 2 = 20?', correctAnswer: 'true', explanation: '5 × 2 = 10, then 10 + 10 = 20. TRUE!', vocabulary: ['order of operations'] },
+      { id: '1-5-4', majorLevel: 1, minorLevel: 5, type: 'choice', question: 'Calculate: 20 ÷ 4 + 3', options: ['5', '6', '7', '8'], correctAnswer: '7', explanation: '20 ÷ 4 = 5, then 5 + 3 = 7', vocabulary: ['division', 'addition'] },
+      { id: '1-5-5', majorLevel: 1, minorLevel: 5, type: 'fill', question: '6 × 3 - 8 = ___', correctAnswer: '10', explanation: '6 × 3 = 18, then 18 - 8 = 10', vocabulary: ['multiplication', 'subtraction'] },
+    ];
+
+    const rewards = [
+      { level: 1, title: 'Great Start!', message: 'You are amazing! Keep learning!' },
+      { level: 2, title: 'Awesome!', message: 'You are so smart! Math is fun!' },
+      { level: 3, title: 'Fantastic!', message: 'You are getting better every day!' },
+      { level: 4, title: 'Super Star!', message: 'Nothing can stop you now!' },
+      { level: 5, title: 'Brilliant!', message: 'Your brain is getting stronger!' },
+      { level: 6, title: 'Excellent!', message: 'You think like a real mathematician!' },
+      { level: 7, title: 'Outstanding!', message: 'You are on your way to becoming a doctor!' },
+      { level: 8, title: 'Magnificent!', message: 'Your English Math skills are growing!' },
+      { level: 9, title: 'Phenomenal!', message: 'Almost there! You are incredible!' },
+      { level: 10, title: 'You Did It!', message: 'Congratulations! You are now Dr. Nana/Jimi!' },
+    ];
+
+    // Game State
+    let state = {
+      screen: 'select',
+      character: null,
+      currentMajorLevel: 1,
+      currentMinorLevel: 1,
+      currentQuestion: null,
+      questionIndex: 0,
+      answers: [],
+      totalPoints: 0,
+      questionsAnswered: 0,
+      correctAnswers: 0,
+      showReward: false,
+      filterMajor: 0,
+      filterMinor: 0,
+      editingQuestion: null
+    };
+
+    // Load saved progress
+    const saved = localStorage.getItem('math-quest-progress');
+    if (saved) {
+      const savedState = JSON.parse(saved);
+      state = { ...state, ...savedState };
+      if (savedState.character) state.screen = 'level';
+    }
+
+    // Helpers
+    const getQuestionsForLevel = (major, minor) => questions.filter(q => q.majorLevel === major && q.minorLevel === minor);
+    const getReward = (level) => rewards[level - 1] || rewards[rewards.length - 1];
+    const saveState = () => {
+      const { screen, currentQuestion, questionIndex, answers, showReward, filterMajor, filterMinor, editingQuestion, ...progress } = state;
+      localStorage.setItem('math-quest-progress', JSON.stringify(progress));
+    };
+
+    // TTS
+    let isSpeaking = false;
+    const playTTS = (text) => {
+      if (isSpeaking) {
+        speechSynthesis.cancel();
+        isSpeaking = false;
+        render();
+        return;
+      }
+      const utterance = new SpeechSynthesisUtterance(text);
+      utterance.lang = 'en-US';
+      utterance.rate = 0.85;
+      const voices = speechSynthesis.getVoices();
+      const voice = voices.find(v => v.lang.startsWith('en')) || voices[0];
+      if (voice) utterance.voice = voice;
+      utterance.onend = () => { isSpeaking = false; render(); };
+      speechSynthesis.speak(utterance);
+      isSpeaking = true;
+    };
+
+    // Render
+    const render = () => {
+      const app = document.getElementById('app');
+      switch (state.screen) {
+        case 'select': app.innerHTML = renderCharacterSelect(); break;
+        case 'level': app.innerHTML = renderLevelSelect(); break;
+        case 'quiz': app.innerHTML = renderQuiz(); break;
+        case 'result': app.innerHTML = renderResult(); break;
+        case 'admin': app.innerHTML = renderAdmin(); break;
+      }
+      if (state.showReward && state.screen === 'result') {
+        app.innerHTML += renderReward();
+      }
+      attachEventListeners();
+    };
+
+    const renderCharacterSelect = () => `
+      <div class="character-select fade-in">
+        <h1 class="game-title">Math Quest</h1>
+        <p class="subtitle">Learn English Math with Fun!</p>
+        <p class="instruction">Choose Your Character</p>
+        <div class="characters">
+          <button class="character-card" data-char="nana">
+            <span class="avatar-icon">👧</span>
+            <h2>Nana</h2>
+            <p>A smart and curious girl</p>
+          </button>
+          <button class="character-card" data-char="jimi">
+            <span class="avatar-icon">👦</span>
+            <h2>Jimi</h2>
+            <p>A brave and clever boy</p>
+          </button>
+        </div>
+      </div>
+    `;
+
+    const renderLevelSelect = () => {
+      const icon = state.character === 'nana' ? '👧' : '👦';
+      const docIcon = state.currentMajorLevel >= 7 ? (state.character === 'nana' ? '👩‍🎓' : '👨‍🎓') : icon;
+      const stage = state.currentMajorLevel <= 3 ? 'Little Student' : state.currentMajorLevel <= 6 ? 'Smart Student' : 'Little Doctor';
+      let html = `
+        <div class="level-select fade-in">
+          <div class="header">
+            <div class="player-info">
+              <div class="player-avatar">${docIcon}</div>
+              <div class="player-stats">
+                <h3>${state.character === 'nana' ? 'Nana' : 'Jimi'}</h3>
+                <p class="stage">${stage}</p>
+                <p class="points">⭐ ${state.totalPoints} points</p>
+              </div>
+            </div>
+            <div>
+              <button class="add-btn" data-action="admin">⚙️ Admin</button>
+              <button class="btn-reset" data-action="reset">🔄 Reset</button>
+            </div>
+          </div>
+          <div class="level-header">
+            <h2>Select Level</h2>
+            <p>Major Level ${state.currentMajorLevel} - Minor Level ${state.currentMinorLevel}</p>
+          </div>
+          <div class="levels-grid">
+      `;
+      for (let i = 1; i <= 10; i++) {
+        html += `<div class="level-section"><h3 class="level-title">Level ${i}</h3><div class="level-buttons">`;
+        for (let j = 1; j <= 10; j++) {
+          const isUnlocked = (i < state.currentMajorLevel) || (i === state.currentMajorLevel && j <= state.currentMinorLevel);
+          const isCompleted = (i < state.currentMajorLevel) || (i === state.currentMajorLevel && j < state.currentMinorLevel);
+          html += `<button class="level-btn ${isUnlocked ? 'unlocked' : 'locked'} ${isCompleted ? 'completed' : ''}" 
+            data-action="startLevel" data-major="${i}" data-minor="${j}" ${!isUnlocked ? 'disabled' : ''}>
+            ${isCompleted ? '✓' : j}
+          </button>`;
+        }
+        html += '</div></div>';
+      }
+      html += '</div><p style="text-align:center;color:var(--text-secondary)">💡 Vocabulary: Numbers, Addition, Subtraction, Multiplication, Division</p></div>';
+      return html;
+    };
+
+    const renderQuiz = () => {
+      const q = state.currentQuestion;
+      const total = getQuestionsForLevel(state.currentMajorLevel, state.currentMinorLevel).length;
+      const typeLabel = q.type === 'choice' ? 'Multiple Choice' : q.type === 'fill' ? 'Fill in the Blank' : 'True or False';
+      const charIcon = state.character === 'nana' ? '👧' : '👦';
+      let html = `
+        <div class="quiz fade-in">
+          <div class="quiz-header">
+            <div class="quiz-info">
+              <span class="character-badge">${charIcon}</span>
+              <span>Question ${state.questionIndex + 1} of ${total}</span>
+            </div>
+            <div class="progress-bar"><div class="progress-fill" style="width:${((state.questionIndex + 1) / total) * 100}%"></div></div>
+          </div>
+          <div class="quiz-content">
+            <div class="question-section">
+              <span class="question-type">${typeLabel}</span>
+              <h2 class="question-text">${q.question}</h2>
+              <button class="tts-btn ${isSpeaking ? 'speaking' : ''}" data-action="tts" data-text="${q.question}">
+                ${isSpeaking ? '🔊 Playing...' : '🔈 Play Question'}
+              </button>
+            </div>
+      `;
+      if (q.type === 'choice' && q.options) {
+        html += '<div class="choices-grid">';
+        q.options.forEach((opt, idx) => {
+          html += `<button class="choice-btn" data-action="answer" data-value="${opt}">
+            <span class="choice-letter">${String.fromCharCode(65 + idx)}</span>${opt}
+          </button>`;
+        });
+        html += '</div>';
+      } else if (q.type === 'fill') {
+        html += `<div class="fill-section">
+          <input type="text" class="fill-input" id="fillAnswer" placeholder="Type your answer...">
+          <button class="submit-btn" data-action="submitFill">Submit</button>
+        </div>`;
+      } else if (q.type === 'boolean') {
+        html += `<div class="boolean-buttons">
+          <button class="bool-btn true-btn" data-action="answer" data-value="true">✓ True</button>
+          <button class="bool-btn false-btn" data-action="answer" data-value="false">✗ False</button>
+        </div>`;
+      }
+      html += '<div id="explanation"></div><button id="nextBtn" class="next-btn hidden" data-action="next">Next Question →</button></div></div>';
+      return html;
+    };
+
+    const renderResult = () => {
+      const correctCount = state.answers.filter(a => a.correct).length;
+      const total = state.answers.length;
+      const percentage = Math.round((correctCount / total) * 100);
+      const passed = correctCount >= 3;
+      const icon = percentage === 100 ? '🏆' : percentage >= 80 ? '🌟' : percentage >= 60 ? '👏' : percentage >= 40 ? '💪' : '📚';
+      const title = percentage === 100 ? 'Perfect!' : percentage >= 80 ? 'Excellent!' : percentage >= 60 ? 'Good Job!' : percentage >= 40 ? 'Keep Trying!' : 'Study More!';
+      const sub = percentage === 100 ? 'You got every question right!' : percentage >= 80 ? 'Almost perfect!' : percentage >= 60 ? 'You passed!' : percentage >= 40 ? 'Practice makes perfect!' : 'Review the vocabulary and try again!';
+      const charIcon = state.character === 'nana' ? '👧' : '👦';
+      return `
+        <div class="result fade-in">
+          <div class="result-card">
+            <div class="result-header"><span style="font-size:2rem">${charIcon}</span><h2>Level Complete!</h2></div>
+            <div class="result-icon">${icon}</div>
+            <h3 class="result-title">${title}</h3>
+            <p class="result-subtitle">${sub}</p>
+            <div class="score-circle" style="background:conic-gradient(${passed ? 'var(--success)' : 'var(--error)'} 0% ${percentage}%, var(--bg-card) ${percentage}% 100%)">
+              <div class="score-inner"><span class="score-number">${percentage}%</span><span class="score-label">${correctCount}/${total}</span></div>
+            </div>
+            <div class="answer-summary">${state.answers.map(a => `<span class="answer-dot ${a.correct ? 'correct' : 'wrong'}">${state.answers.indexOf(a) + 1}</span>`).join('')}</div>
+            <span class="status-badge ${passed ? 'passed' : 'failed'}">${passed ? '✓ Level Passed!' : '✗ Try Again'}</span>
+            <button class="continue-btn" data-action="continue" data-passed="${passed}">${passed ? 'Continue →' : 'Try Again'}</button>
+          </div>
+        </div>
+      `;
+    };
+
+    const renderReward = () => {
+      const reward = getReward(state.currentMajorLevel);
+      const charIcon = state.character === 'nana' ? '👧' : '👦';
+      const evolution = state.currentMajorLevel >= 7 ? (state.character === 'nana' ? '👩‍🎓' : '👨‍🎓') : charIcon;
+      const stage = state.currentMajorLevel >= 7 ? 'Doctor' : state.currentMajorLevel >= 4 ? 'Smart Student' : 'Little Student';
+      return `
+        <div class="reward-overlay" id="rewardOverlay">
+          <div class="reward-modal">
+            <div class="reward-content">
+              <div class="reward-header"><h2>${reward.title}</h2><p>Level ${state.currentMajorLevel} Completed!</p></div>
+              <div class="character-evolution">
+                <span class="evolution-icon">${evolution}</span>
+                <span class="evolution-badge">${stage}</span>
+              </div>
+              <div class="reward-message"><p>${reward.message}</p></div>
+              <button class="collect-btn" data-action="closeReward">Collect Reward 🎁</button>
+            </div>
+          </div>
+        </div>
+      `;
+    };
+
+    const renderAdmin = () => {
+      const filtered = questions.filter(q => 
+        (state.filterMajor === 0 || q.majorLevel === state.filterMajor) &&
+        (state.filterMinor === 0 || q.minorLevel === state.filterMinor)
+      );
+      return `
+        <div class="admin fade-in">
+          <div class="admin-header">
+            <button class="back-btn" data-action="back">← Back</button>
+            <h1>Question Bank Admin</h1>
+            <button class="add-btn" data-action="addQuestion">+ Add Question</button>
+          </div>
+          <div class="admin-toolbar">
+            <select id="filterMajor">
+              <option value="0" ${state.filterMajor === 0 ? 'selected' : ''}>All Major Levels</option>
+              ${[1,2,3,4,5,6,7,8,9,10].map(i => `<option value="${i}" ${state.filterMajor === i ? 'selected' : ''}>Level ${i}</option>`).join('')}
+            </select>
+            <select id="filterMinor">
+              <option value="0" ${state.filterMinor === 0 ? 'selected' : ''}>All Minor Levels</option>
+              ${[1,2,3,4,5,6,7,8,9,10].map(i => `<option value="${i}" ${state.filterMinor === i ? 'selected' : ''}>Level ${i}</option>`).join('')}
+            </select>
+            <span class="count">Total: ${filtered.length} questions</span>
+          </div>
+          <div class="questions-list">
+            ${filtered.map((q, idx) => `
+              <div class="question-item">
+                <div class="question-meta">
+                  <span class="level-badge">${q.majorLevel}-${q.minorLevel}</span>
+                  <span class="type-badge ${q.type}">${q.type === 'choice' ? 'MCQ' : q.type === 'fill' ? 'Fill' : 'TF'}</span>
+                  <span style="margin-left:auto;color:var(--text-secondary)">#${idx + 1}</span>
+                </div>
+                <p class="question-preview">${q.question}</p>
+                <div class="question-actions">
+                  <span style="color:var(--text-secondary);font-size:0.85rem">Answer: <strong>${q.correctAnswer}</strong></span>
+                  <button class="edit-btn" data-action="editQuestion" data-id="${q.id}">✏️ Edit</button>
+                  <button class="delete-btn" data-action="deleteQuestion" data-id="${q.id}">🗑️ Delete</button>
+                </div>
+              </div>
+            `).join('')}
+            ${filtered.length === 0 ? '<p style="text-align:center;color:var(--text-secondary);padding:2rem">No questions found. Click "+ Add Question" to create one!</p>' : ''}
+          </div>
+        </div>
+      `;
+    };
+
+    const renderQuestionModal = (question = null) => {
+      const isEdit = question !== null;
+      return `
+        <div class="modal-overlay" id="questionModal">
+          <div class="modal">
+            <h2>${isEdit ? 'Edit Question' : 'Add New Question'}</h2>
+            <form id="questionForm">
+              <div class="form-row">
+                <div class="form-group">
+                  <label>Major Level (1-10)</label>
+                  <input type="number" id="qMajor" min="1" max="10" value="${isEdit ? question.majorLevel : 1}" required>
+                </div>
+                <div class="form-group">
+                  <label>Minor Level (1-10)</label>
+                  <input type="number" id="qMinor" min="1" max="10" value="${isEdit ? question.minorLevel : 1}" required>
+                </div>
+                <div class="form-group">
+                  <label>Question Type</label>
+                  <select id="qType">
+                    <option value="choice" ${isEdit && question.type === 'choice' ? 'selected' : ''}>Multiple Choice</option>
+                    <option value="fill" ${isEdit && question.type === 'fill' ? 'selected' : ''}>Fill in Blank</option>
+                    <option value="boolean" ${isEdit && question.type === 'boolean' ? 'selected' : ''}>True/False</option>
+                  </select>
+                </div>
+              </div>
+              
+              <div class="form-group">
+                <label>Question (English)</label>
+                <textarea id="qQuestion" required placeholder="Enter the question in English...">${isEdit ? question.question : ''}</textarea>
+              </div>
+              
+              <div class="form-group" id="optionsGroup">
+                <label>Options (for Multiple Choice)</label>
+                <div class="options-group">
+                  <input type="text" id="qOptA" placeholder="Option A" value="${isEdit && question.options ? question.options[0] : ''}">
+                  <input type="text" id="qOptB" placeholder="Option B" value="${isEdit && question.options ? question.options[1] : ''}">
+                  <input type="text" id="qOptC" placeholder="Option C" value="${isEdit && question.options ? question.options[2] : ''}">
+                  <input type="text" id="qOptD" placeholder="Option D" value="${isEdit && question.options ? question.options[3] : ''}">
+                </div>
+              </div>
+              
+              <div class="form-group">
+                <label>Correct Answer</label>
+                <input type="text" id="qAnswer" required value="${isEdit ? question.correctAnswer : ''}" placeholder="Enter the correct answer">
+              </div>
+              
+              <div class="form-group">
+                <label>Explanation</label>
+                <textarea id="qExplanation" placeholder="Explain why this is the answer...">${isEdit ? question.explanation : ''}</textarea>
+              </div>
+              
+              <div class="form-group">
+                <label>Vocabulary (comma-separated)</label>
+                <div class="vocab-input">
+                  <input type="text" id="qVocabInput" placeholder="e.g., sum, addition, plus">
+                  <button type="button" class="add-btn" id="addVocabBtn">Add</button>
+                </div>
+                <div class="vocab-tags" id="vocabTags">
+                  ${(isEdit ? question.vocabulary : []).map((v, i) => `<span class="vocab-tag" data-word="${v}">${v} <span onclick="removeVocab('${v}')">×</span></span>`).join('')}
+                </div>
+                <input type="hidden" id="qVocab" value="${isEdit ? question.vocabulary.join(',') : ''}">
+              </div>
+              
+              <div class="modal-actions">
+                <button type="button" class="cancel-btn" data-action="closeModal">Cancel</button>
+                <button type="submit" class="save-btn">${isEdit ? 'Save Changes' : 'Add Question'}</button>
+              </div>
+            </form>
+          </div>
+        </div>
+      `;
+    };
+
+    // Event handlers
+    const handleAnswer = (answer) => {
+      const q = state.currentQuestion;
+      const isCorrect = answer.toLowerCase() === q.correctAnswer.toLowerCase();
+      state.answers.push({ questionId: q.id, correct: isCorrect });
+      state.totalPoints += isCorrect ? 10 : 0;
+      state.correctAnswers += isCorrect ? 1 : 0;
+      state.questionsAnswered++;
+      showExplanation(isCorrect);
+    };
+
+    const showExplanation = (isCorrect) => {
+      const q = state.currentQuestion;
+      const expDiv = document.getElementById('explanation');
+      const nextBtn = document.getElementById('nextBtn');
+      expDiv.innerHTML = `
+        <div class="explanation ${isCorrect ? 'correct' : 'wrong'}">
+          <p><strong>${isCorrect ? '🎉 Correct!' : '💡 Answer:'}</strong></p>
+          <p>${isCorrect ? q.explanation : `The answer is: ${q.correctAnswer}. ${q.explanation}`}</p>
+          <div class="vocabulary"><strong>📚 Vocabulary:</strong> ${q.vocabulary.map(w => `<span class="vocab-word">${w}</span>`).join('')}</div>
+        </div>
+      `;
+      nextBtn.classList.remove('hidden');
+      document.querySelectorAll('.choice-btn, .bool-btn').forEach(btn => {
+        btn.disabled = true;
+        if (btn.dataset.value?.toLowerCase() === q.correctAnswer.toLowerCase()) btn.classList.add('correct');
+        else if (btn.dataset.value === state.answers[state.answers.length - 1]?.value && !isCorrect) btn.classList.add('wrong');
+      });
+    };
+
+    const nextQuestion = () => {
+      const levelQuestions = getQuestionsForLevel(state.currentMajorLevel, state.currentMinorLevel);
+      if (state.questionIndex + 1 < levelQuestions.length) {
+        state.questionIndex++;
+        state.currentQuestion = levelQuestions[state.questionIndex];
+      } else {
+        state.screen = 'result';
+        state.showReward = state.answers.filter(a => a.correct).length >= 3;
+      }
+      saveState();
+      render();
+    };
+
+    // Admin functions
+    const showQuestionModal = (questionId = null) => {
+      const question = questionId ? questions.find(q => q.id === questionId) : null;
+      document.body.insertAdjacentHTML('beforeend', renderQuestionModal(question));
+      
+      // Vocab management
+      let vocabList = question ? [...question.vocabulary] : [];
+      
+      window.removeVocab = (word) => {
+        vocabList = vocabList.filter(v => v !== word);
+        updateVocabDisplay();
+      };
+      
+      const updateVocabDisplay = () => {
+        document.getElementById('qVocab').value = vocabList.join(',');
+        document.getElementById('vocabTags').innerHTML = vocabList.map(v => 
+          `<span class="vocab-tag" data-word="${v}">${v} <span onclick="removeVocab('${v}')">×</span></span>`
+        ).join('');
+      };
+      
+      document.getElementById('addVocabBtn')?.addEventListener('click', () => {
+        const input = document.getElementById('qVocabInput');
+        if (input.value.trim()) {
+          vocabList.push(input.value.trim());
+          input.value = '';
+          updateVocabDisplay();
+        }
+      });
+      
+      // Toggle options visibility
+      document.getElementById('qType')?.addEventListener('change', (e) => {
+        document.getElementById('optionsGroup').style.display = e.target.value === 'choice' ? 'block' : 'none';
+      });
+      
+      // Form submit
+      document.getElementById('questionForm')?.addEventListener('submit', (e) => {
+        e.preventDefault();
+        
+        const majorLevel = parseInt(document.getElementById('qMajor').value);
+        const minorLevel = parseInt(document.getElementById('qMinor').value);
+        const type = document.getElementById('qType').value;
+        const qText = document.getElementById('qQuestion').value;
+        const answer = document.getElementById('qAnswer').value;
+        const explanation = document.getElementById('qExplanation').value;
+        const vocab = document.getElementById('qVocab').value.split(',').filter(v => v.trim());
+        
+        let options = undefined;
+        if (type === 'choice') {
+          options = [
+            document.getElementById('qOptA').value,
+            document.getElementById('qOptB').value,
+            document.getElementById('qOptC').value,
+            document.getElementById('qOptD').value
+          ];
+        }
+        
+        const newQuestion = {
+          id: question ? question.id : `${majorLevel}-${minorLevel}-${Date.now()}`,
+          majorLevel,
+          minorLevel,
+          type,
+          question: qText,
+          options,
+          correctAnswer: answer,
+          explanation,
+          vocabulary: vocab
+        };
+        
+        if (question) {
+          questions = questions.map(q => q.id === question.id ? newQuestion : q);
+        } else {
+          questions.push(newQuestion);
+        }
+        
+        closeModal();
+        render();
+      });
+    };
+
+    const closeModal = () => {
+      document.getElementById('questionModal')?.remove();
+    };
+
+    const deleteQuestion = (id) => {
+      if (confirm('Are you sure you want to delete this question?')) {
+        questions = questions.filter(q => q.id !== id);
+        render();
+      }
+    };
+
+    const attachEventListeners = () => {
+      // Character select
+      document.querySelectorAll('[data-char]').forEach(btn => {
+        btn.addEventListener('click', () => {
+          state.character = btn.dataset.char;
+          state.screen = 'level';
+          saveState();
+          render();
+        });
+      });
+
+      // Level select
+      document.querySelectorAll('[data-action="startLevel"]').forEach(btn => {
+        btn.addEventListener('click', () => {
+          state.currentMajorLevel = parseInt(btn.dataset.major);
+          state.currentMinorLevel = parseInt(btn.dataset.minor);
+          const levelQuestions = getQuestionsForLevel(state.currentMajorLevel, state.currentMinorLevel);
+          if (levelQuestions.length > 0) {
+            state.screen = 'quiz';
+            state.currentQuestion = levelQuestions[0];
+            state.questionIndex = 0;
+            state.answers = [];
+          } else {
+            alert('No questions in this level! Go to Admin to add questions.');
+          }
+          render();
+        });
+      });
+
+      // Admin
+      document.querySelector('[data-action="admin"]')?.addEventListener('click', () => {
+        state.screen = 'admin';
+        state.filterMajor = 0;
+        state.filterMinor = 0;
+        render();
+      });
+
+      // Filter changes
+      document.getElementById('filterMajor')?.addEventListener('change', (e) => {
+        state.filterMajor = parseInt(e.target.value);
+        render();
+      });
+      document.getElementById('filterMinor')?.addEventListener('change', (e) => {
+        state.filterMinor = parseInt(e.target.value);
+        render();
+      });
+
+      // Add question
+      document.querySelector('[data-action="addQuestion"]')?.addEventListener('click', () => {
+        showQuestionModal();
+      });
+
+      // Edit question
+      document.querySelectorAll('[data-action="editQuestion"]').forEach(btn => {
+        btn.addEventListener('click', () => {
+          showQuestionModal(btn.dataset.id);
+        });
+      });
+
+      // Delete question
+      document.querySelectorAll('[data-action="deleteQuestion"]').forEach(btn => {
+        btn.addEventListener('click', () => {
+          deleteQuestion(btn.dataset.id);
+        });
+      });
+
+      // Reset
+      document.querySelector('[data-action="reset"]')?.addEventListener('click', () => {
+        if (confirm('Reset all progress?')) {
+          localStorage.removeItem('math-quest-progress');
+          state = { screen: 'select', character: null, currentMajorLevel: 1, currentMinorLevel: 1, currentQuestion: null, questionIndex: 0, answers: [], totalPoints: 0, questionsAnswered: 0, correctAnswers: 0, showReward: false, filterMajor: 0, filterMinor: 0, editingQuestion: null };
+          render();
+        }
+      });
+
+      // Back
+      document.querySelector('[data-action="back"]')?.addEventListener('click', () => {
+        state.screen = 'level';
+        render();
+      });
+
+      // Close modal
+      document.querySelector('[data-action="closeModal"]')?.addEventListener('click', closeModal);
+      document.querySelector('.modal-overlay')?.addEventListener('click', (e) => {
+        if (e.target.classList.contains('modal-overlay')) closeModal();
+      });
+
+      // TTS
+      document.querySelector('[data-action="tts"]')?.addEventListener('click', (e) => {
+        playTTS(e.target.dataset.text);
+      });
+
+      // Answer
+      document.querySelectorAll('[data-action="answer"]').forEach(btn => {
+        btn.addEventListener('click', () => handleAnswer(btn.dataset.value));
+      });
+
+      // Fill submit
+      document.querySelector('[data-action="submitFill"]')?.addEventListener('click', () => {
+        const input = document.getElementById('fillAnswer');
+        if (input?.value.trim()) handleAnswer(input.value.trim());
+      });
+
+      // Next
+      document.querySelector('[data-action="next"]')?.addEventListener('click', nextQuestion);
+
+      // Continue
+      document.querySelector('[data-action="continue"]')?.addEventListener('click', (e) => {
+        const passed = e.target.dataset.passed === 'true';
+        if (passed) {
+          if (state.currentMinorLevel < 10) state.currentMinorLevel++;
+          else if (state.currentMajorLevel < 10) {
+            state.currentMajorLevel++;
+            state.currentMinorLevel = 1;
+          }
+        }
+        state.screen = 'level';
+        state.showReward = false;
+        saveState();
+        render();
+      });
+
+      // Close reward
+      document.querySelector('[data-action="closeReward"]')?.addEventListener('click', () => {
+        state.showReward = false;
+        render();
+      });
+    };
+
+    // Load voices
+    speechSynthesis.onvoiceschanged = () => speechSynthesis.getVoices();
+
+    // Initial render
+    render();
+  </script>
+</body>
+</html>
