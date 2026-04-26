@@ -43,19 +43,50 @@ export default function Dashboard({ onPlayGame, onLogout }: DashboardProps) {
     }
   };
 
-  const renderSuperAdminDashboard = () => (
+  // Show loading state while profile is being fetched
+  if (!profile && user) {
+    return (
+      <div className="loading-screen">
+        <div className="loading-spinner"></div>
+        <p>Loading dashboard...</p>
+      </div>
+    );
+  }
+
+  const userName = profile?.full_name || user?.email || 'User';
+  const isAdmin = profile?.role === 'super_admin' || profile?.role === 'school_admin';
+
+  return (
     <div className="dashboard">
       <header className="dashboard-header">
         <div className="header-content">
-          <h1 className="dashboard-title">Math Quest Admin</h1>
-          <p className="dashboard-subtitle">Welcome, {profile?.full_name || user?.email}</p>
+          <h1 className="dashboard-title">
+            {isAdmin ? 'Math Quest Admin' : 'Math Quest'}
+          </h1>
+          <p className="dashboard-subtitle">Welcome, {userName}!</p>
         </div>
         <div className="header-actions">
-          <span className="role-badge super-admin">Super Admin</span>
+          {isAdmin && (
+            <span className="role-badge super-admin">
+              {profile?.role === 'super_admin' ? 'Super Admin' : 'School Admin'}
+            </span>
+          )}
           <button onClick={onLogout} className="logout-button">Logout</button>
         </div>
       </header>
 
+      {isAdmin ? (
+        <SuperAdminContent stats={stats} loading={loading} onPlayGame={onPlayGame} onRefresh={fetchStats} />
+      ) : (
+        <StudentContent onPlayGame={onPlayGame} />
+      )}
+    </div>
+  );
+}
+
+function SuperAdminContent({ stats, loading, onPlayGame, onRefresh }: any) {
+  return (
+    <>
       <div className="stats-grid">
         <div className="stat-card">
           <div className="stat-icon schools">🏫</div>
@@ -86,36 +117,22 @@ export default function Dashboard({ onPlayGame, onLogout }: DashboardProps) {
           <span className="action-text">Play Game</span>
           <span className="action-desc">Start learning math!</span>
         </button>
-        <SuperAdminPanel onRefresh={fetchStats} />
+        <SuperAdminPanel onRefresh={onRefresh} />
       </div>
+    </>
+  );
+}
+
+function StudentContent({ onPlayGame }: any) {
+  return (
+    <div className="welcome-section">
+      <h2>Ready to learn?</h2>
+      <p>Choose your character and start your math adventure!</p>
+      <button onClick={onPlayGame} className="play-button">
+        🎮 Start Playing
+      </button>
     </div>
   );
-
-  const renderStudentDashboard = () => (
-    <div className="dashboard">
-      <header className="dashboard-header">
-        <div className="header-content">
-          <h1 className="dashboard-title">Math Quest</h1>
-          <p className="dashboard-subtitle">Welcome back, {profile?.full_name || user?.email}!</p>
-        </div>
-        <button onClick={onLogout} className="logout-button">Logout</button>
-      </header>
-
-      <div className="welcome-section">
-        <h2>Ready to learn?</h2>
-        <p>Choose your character and start your math adventure!</p>
-        <button onClick={onPlayGame} className="play-button">
-          🎮 Start Playing
-        </button>
-      </div>
-    </div>
-  );
-
-  if (profile?.role === 'super_admin' || profile?.role === 'school_admin') {
-    return renderSuperAdminDashboard();
-  }
-
-  return renderStudentDashboard();
 }
 
 function SuperAdminPanel({ onRefresh }: { onRefresh: () => void }) {

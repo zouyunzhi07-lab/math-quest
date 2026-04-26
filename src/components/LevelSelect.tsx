@@ -1,3 +1,4 @@
+import { useAuth } from '../AuthContext';
 import { UserProgress } from '../types';
 import './LevelSelect.css';
 
@@ -9,6 +10,8 @@ interface Props {
 }
 
 function LevelSelect({ progress, onSelectLevel, onAdmin, onReset }: Props) {
+  const { profile } = useAuth();
+  
   const characterIcon = progress.character === 'nana' ? '👧' : '👦';
   const characterName = progress.character === 'nana' ? 'Nana' : 'Jimi';
   const stageName = progress.characterStage <= 3 ? 'Little Student' 
@@ -22,6 +25,9 @@ function LevelSelect({ progress, onSelectLevel, onAdmin, onReset }: Props) {
     return characterIcon;
   };
 
+  // Only show Admin button for super_admin
+  const isAdmin = profile?.role === 'super_admin' || profile?.role === 'school_admin';
+
   return (
     <div className="level-select fade-in">
       <div className="header">
@@ -34,7 +40,9 @@ function LevelSelect({ progress, onSelectLevel, onAdmin, onReset }: Props) {
           </div>
         </div>
         <div className="header-actions">
-          <button className="btn-admin" onClick={onAdmin}>⚙️ Admin</button>
+          {isAdmin && (
+            <button className="btn-admin" onClick={onAdmin}>⚙️ Admin</button>
+          )}
           <button className="btn-reset" onClick={onReset}>🔄 Reset</button>
         </div>
       </div>
